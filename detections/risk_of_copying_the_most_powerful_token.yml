@@ -1,0 +1,37 @@
+title: High Risk Actions - copying of the most powerful token through API Explorer
+id: 90a9a856-716d-11f0-bb81-723487b9527c
+status: experimental
+description: >
+    The Auth0 Dashboard generates automatically a special token that is authorized to use all available Management API scopes  (except for newly released scopes that shall be added manually). This token can be copied via Applications --> APIs --> Auth0 Management API --> API Explorer
+author: Okta
+date: 2025-07-11
+modified: 2025-08-04
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: seccft
+        data.client_id: "{api_explorer_client_id}"
+    condition: selection
+tenant_logs: >
+    type: "seccft" AND client_id: "{api_explorer_client_id}"
+explanation: >
+    The query simply collects entries issued when such a token is accessed via Dashboard.
+splunk: >
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="seccft" data.client_id="{api_explorer_client_id}"
+    ```Display the information in a table: user checking the secret and IP of this user```
+    |  data.user_id, data.user_name, data.ip
+comments: >
+    The Splunk query above shall be tuned to reflect a valid tenant name and a client_id for the API Explorer application.
+prevention:
+    - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
+falsepositives:
+    - Legitimate access by an administrator to read the API Explorer token.
+level: medium
+tags:
+    - attack.credential-access
+    - attack.t1528

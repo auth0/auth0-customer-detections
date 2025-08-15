@@ -1,0 +1,5 @@
+PyYAML==6.0.2
+yamllint==1.37.1
+ruff==0.12.7
+pytest==8.4.1
+sigma-cli==1.0.6

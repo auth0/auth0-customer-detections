@@ -1,0 +1,54 @@
+title: Risk of signup fraud - rapid creation of fake accounts with disposable email domains
+id: e92605d8-716d-11f0-b2ae-723487b9527c
+status: experimental
+description: >
+    Detects potential signup fraud by monitoring the use of disposable emails.
+author: Okta
+date: 2025-07-11
+modified: 2025-08-04
+logsource:
+    product: auth0
+    service: signup
+detection:
+    selection:
+        data.type: "ss"
+        data.user_name:
+            - "*@mailinator.com"
+            - "*@yopmail.com"
+            - "*@10minutemail.com"
+            - "*@guerrillamail.com"
+            - "*@temp-mail.org"
+            - "*@disposable.com"
+            - "*@mailnesia.com"
+            - "*@sharklasers.com"
+            - "*@getnada.com"
+            - "*@mohmal.com"
+    condition: selection
+explanation: >
+    The query monitors successful signups events within a selected time window and validates if a disposable email has been used. It alerts when the number of users with disposable emails exceeds a threshold.
+splunk: >
+    index=auth0 data.type = "ss"
+    | bin _time span=1h
+    | search data.user_name IN ("*@mailinator.com", "*@yopmail.com", "*@10minutemail.com",
+    "*@guerrillamail.com", "*@temp-mail.org", "*@disposable.com", "*@mailnesia.com",
+    "*@sharklasers.com", "*@getnada.com", "*@mohmal.com")
+    | stats dc(data.user_name) as user_count values(data.user_name) as user_names
+    values(data.user_id) as user_ids by _time, data.type
+    | where user_count > {thresholds_disposable_emails}
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - The value for thresholds_disposable_emails should be set based on the customer's environment and expected behavior.
+    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate the thresholds based on the observed data.
+    - The query can be adjusted to account for a longer public blocklist, e.g. available on github, using a lookup table.
+tenant_logs:
+    type:"fs" OR type:"ss" OR type:"signup_pwd_leak"
+prevention:
+    - Use pre-registration actions to block any registration with disposable emails.
+    - Force email validation built-in feature of a Database connection on signup.
+    - Block or delete the created fraudulent accounts (terminating the sessions and revoking tokens).
+falsepositives:
+    - Legitimate users using disposable email addresses for privacy reasons.
+level: medium
+tags:
+    - attack.resource-development
+    - attack.t1136

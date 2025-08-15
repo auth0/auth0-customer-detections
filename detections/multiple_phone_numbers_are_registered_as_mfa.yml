@@ -1,0 +1,39 @@
+title: Risk for account takeover - phone number registered to multiple users
+id: 25b35d32-716b-11f0-a54e-723487b9527c
+status: experimental
+description: >
+    An adversary can try to register the same phone number (for the SMS delivery) as a second factor (MFA) to multiple compromised accounts in order to maintain persistence.
+author: Okta
+date: 2025-07-11
+modified: 2025-08-04
+logsource:
+    product: auth0
+    service: mfa
+detection:
+    selection:
+        data.type: gd_enrollment_complete
+        data.description: "Guardian - Enrollment complete (sms)"
+    condition: selection
+tenant_logs: >
+    type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete (sms)"
+explanation: >
+    The query below collects entries from the tenant logs where the phone number is registered.
+    The splunk query below groups users by a phone number, i.e. collects users with the same phone number.
+    It returns phone numbers where the number of users is greater than 1.
+splunk: >
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.description="Guardian - Enrollment complete (sms)"
+    data.type=gd_enrollment_complete
+    | stats dc(data.user_id) as users_count values(data.ip) by data.details.authenticator.phone_number
+    | where users_count > 1
+comments: >
+    The Splunk query above shall be tuned to reflect a valid tenant_name.
+prevention:
+    - Require strong MFA factors and do not allow factors such as email or SMS.
+    - Deploy a send-phone-message action implementing a logic to validate that a phone number is registered only once.
+falsepositives:
+    - To filter out false positives, look at the users' emails or users' names. If the emails/names look similar, e.g. one personal email (jane.parker@gmail.com) and one work email (jparker@company.com),  then it is likely that the phone number is registered to multiple users intentionally.
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1098

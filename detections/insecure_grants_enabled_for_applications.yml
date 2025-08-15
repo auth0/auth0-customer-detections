@@ -1,0 +1,55 @@
+title: Insecure OAuth2.x flows have been enabled for some applications
+id: 7b4ec6f9-fdae-4e35-8c5c-8daaf473220c
+status: experimental
+description: >
+    Detect when applications' configurations have been updated with insecure grant types, e.g. implicit and resource owner password grant.
+    According to the recent update OAuth2.1 and RFC 9700, these flows shall be avoided.
+author: Okta
+date: 2025-07-11
+modified: 2025-08-04
+logsource:
+    product: auth0
+    service: oidc_oauth2
+detection:
+    selection:
+        data.type: sapi
+        data.description:
+            - Update a client
+        data.details.response.statusCode: 200
+    filter:
+        data.details.response.body.grant_types{}:
+            - 'implicit'
+            - 'password'
+    condition: selection and filter
+explanation: >
+    The query collects log records issued when any of the configurations for an application are updated.
+    It filters for grant types if it contains implicit and/or password (Resource Owner Password Grant).
+    The splunk query below displays modifying IP and modified client_id where insecure grants have been enabled.
+splunk: >
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type="sapi" data.description="Update a client"
+    ```Limiting to critical appllications```
+    ```data.details.response.body.client_id IN ('{critical-client_id-1}', '{critical-client_id-2}')
+    data.details.response.statusCode=200
+    data.details.response.body.grant_types{} IN ("implicit", "password")
+    ```Display the information in a table```
+    |table data.ip, data.details.response.body.client_id, data.details.response.body.grant_types{}
+comments:
+    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit this detection to monitoring a critical set of applications.
+tenant_logs: >
+    type:"sapi" AND description: "Update a client"
+prevention:
+    - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
+    - Control Management API scopes that allow modification of attack protection features - update:clients.
+    - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
+    - If you have an edge case where the implicit flow is necessary, consider the form_post response mode and/or request access token in a combination with an id token.
+    - Default for Authorization Code grant with PKCE even for regular web applications, i.e. confidential clients enforcing PKCE with a post-login action.
+falsepositives:
+    - Legitimate updates by an administrator. This rule is designed for threat hunting and to be a starting point for further investigation.
+    - An exempted application has been updated with insecure grant types. It is still not recommended to use these flows.
+level: medium
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
