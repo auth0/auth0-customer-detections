@@ -2,7 +2,7 @@ title: Too many failed authorization requests due to wrong parameters
 id: 27d3b46e-3a2e-48e9-95bb-4622101572b9
 status: experimental
 description: >
-    Detects when a request for authorization provides an unregistered redirect URI, audience, client, unsupported response type, or unsupported challenge type.
+    Detect when a request for authorization provides an unregistered redirect URI, audience, client, unsupported response type, or unsupported challenge type.
     An adversary may try to harvest authorization codes for exchanging them for tokens later, or simply conducting a denial-of-service attack by depleting the rate limit.
 author: Okta
 date: 2025-07-11

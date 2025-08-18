@@ -14,8 +14,6 @@ detection:
         data.type: gd_send_pn
         data.description: "Guardian - Second factor notification sent"
     condition: selection
-tenant_logs: >
-    type:"gd_send_pn" AND description: "Guardian - Second factor notification sent"
 explanation: >
     The query below filters events capturing sending push notifications.
     The suplunk query looks up additinal statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
@@ -32,6 +30,8 @@ splunk: >
     | table count_pushes_per_user, window_duration_mins, data.user_id, data.ip
 comments: >
     The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent, i.e {time_window_threshold}, and  how many push notifications have been sent per user ({count_pushes_per_user_threshold}). A similar detection (with less details) can be implemented through Security Center and its alerts.
+tenant_logs: >
+    type:"gd_send_pn" AND description: "Guardian - Second factor notification sent"
 prevention:
     - Enforcing strong MFA authenticators such as phishing-resistance with FIDO2 WebAuthn.
     - Implement passwordless authentication to reduce the risk for initial password compromise.

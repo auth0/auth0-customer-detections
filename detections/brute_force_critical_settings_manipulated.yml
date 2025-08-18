@@ -2,7 +2,7 @@ title: Brute Force Protection - critical settings manipulated
 id: 8281291e-51b4-46a9-8012-955e20406efd
 status: experimental
 description: >
-    Detects when Brute Force Protection has been disabled at all or set to a monitoring mode where no blocking occurs.
+    Detect when Brute Force Protection has been disabled at all or set to a monitoring mode where no blocking occurs.
     This can allow malicious actors to continue brute force attacks without being detected and blocked.
 author: Okta
 date: 2025-07-11

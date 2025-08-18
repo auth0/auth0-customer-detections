@@ -14,8 +14,6 @@ detection:
         data.type: gd_enrollment_complete
         data.description: "Guardian - Enrollment complete (sms)"
     condition: selection
-tenant_logs: >
-    type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete (sms)"
 explanation: >
     The query below collects entries from the tenant logs where the phone number is registered.
     The splunk query below groups users by a phone number, i.e. collects users with the same phone number.
@@ -28,6 +26,8 @@ splunk: >
     | where users_count > 1
 comments: >
     The Splunk query above shall be tuned to reflect a valid tenant_name.
+tenant_logs: >
+    type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete (sms)"
 prevention:
     - Require strong MFA factors and do not allow factors such as email or SMS.
     - Deploy a send-phone-message action implementing a logic to validate that a phone number is registered only once.

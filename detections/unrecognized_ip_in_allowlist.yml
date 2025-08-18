@@ -1,14 +1,14 @@
 title: Unrecognized IP in attack protection allowlists
 id: 5b7a6b8c-6e3b-11f0-a54c-723487b9527e
 status: experimental
+description: >
+    Detect when new IPs are added into any attack protection allowlist. Since allowlists suspend some controls, they should be closely monitored for unrecognized IPs. A threat actor can try to add a malicious IP in order to bypass attack protection features.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
 logsource:
     product: auth0
     service: management_api
-description: >
-    Detects when new IPs are added into any attack protection allowlist. Since allowlists suspend some controls, they should be closely monitored for unrecognized IPs. A threat actor can try to add a malicious IP in order to bypass attack protection features.
 references:
     - https://auth0.com/docs/secure/attack-protection
     - https://auth0.com/docs/secure/attack-protection/playbooks

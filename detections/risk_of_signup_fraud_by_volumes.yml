@@ -2,7 +2,7 @@ title: Risk of signup fraud - rapid creation of fake accounts
 id: 3a9be414-716e-11f0-8153-723487b9527c
 status: experimental
 description: >
-    Detects potential signup fraud by monitoring the following events:  surge in a number of registration, excessive failed signups,  or too many signup attempts with use of breached passwords.
+    Detect potential signup fraud by monitoring the following events:  surge in a number of registration, excessive failed signups,  or too many signup attempts with use of breached passwords.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

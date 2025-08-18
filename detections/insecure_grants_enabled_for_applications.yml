@@ -44,7 +44,7 @@ prevention:
     - Control Management API scopes that allow modification of attack protection features - update:clients.
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
     - If you have an edge case where the implicit flow is necessary, consider the form_post response mode and/or request access token in a combination with an id token.
-    - Default for Authorization Code grant with PKCE even for regular web applications, i.e. confidential clients enforcing PKCE with a post-login action.
+    - Default to the Authorization Code grant with PKCE even for regular web applications enforcing PKCE with a post-login action.
 falsepositives:
     - Legitimate updates by an administrator. This rule is designed for threat hunting and to be a starting point for further investigation.
     - An exempted application has been updated with insecure grant types. It is still not recommended to use these flows.
