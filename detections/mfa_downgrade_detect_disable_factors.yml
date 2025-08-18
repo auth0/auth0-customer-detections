@@ -15,8 +15,6 @@ detection:
         data.description: "Update multi-factor authentication type"
         data.details.request.body.enabled: false
     condition: selection
-tenant_logs: >
-    type: "sapi" AND description: "Update multi-factor authentication type"
 explanation: >
     The query filters for log entries recording changes in availability of MFA factors for the whole tenant.
     The splunk query below also parses the path where the last part shows the type of the disabled factor.
@@ -37,6 +35,8 @@ comments: >
     The splunk query above, shall be tuned to reflect a valid tenant name.
     Additionally, you can expand the detection to other factors, e.g. SMS.
     Limit the detection to actions conducted from untrusted IPs and/or particular users.
+tenant_logs: >
+    type: "sapi" AND description: "Update multi-factor authentication type"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.

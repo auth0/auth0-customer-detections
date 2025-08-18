@@ -2,7 +2,7 @@ title: Risk of signup fraud - rapid creation of fake accounts with disposable em
 id: e92605d8-716d-11f0-b2ae-723487b9527c
 status: experimental
 description: >
-    Detects potential signup fraud by monitoring the use of disposable emails.
+    Detect potential signup fraud by monitoring the use of disposable emails.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

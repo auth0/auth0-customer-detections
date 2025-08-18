@@ -14,8 +14,6 @@ detection:
         data.type: seccft
         data.client_id: "{api_explorer_client_id}"
     condition: selection
-tenant_logs: >
-    type: "seccft" AND client_id: "{api_explorer_client_id}"
 explanation: >
     The query simply collects entries issued when such a token is accessed via Dashboard.
 splunk: >
@@ -25,6 +23,8 @@ splunk: >
     |  data.user_id, data.user_name, data.ip
 comments: >
     The Splunk query above shall be tuned to reflect a valid tenant name and a client_id for the API Explorer application.
+tenant_logs: >
+    type: "seccft" AND client_id: "{api_explorer_client_id}"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.

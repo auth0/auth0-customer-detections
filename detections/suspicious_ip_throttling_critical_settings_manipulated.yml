@@ -19,8 +19,6 @@ detection:
         # Alternatively, if the feature is set to monitoring mode (no blocking or no admin notifications)
         # we can check for shields not containing "block" or "admin_notification"
     condition: selection or filter
-tenant_logs: >
-    "type: "sapi" AND description: "Update Suspicious IP Throttling settings"
 explanation: >
     The query filters for an event indicating a change of Suspicious IP Throttling settings.
     The splunk query below alerts when the feature is completely disabled or set into a monitoring mode,  i.e. no blocking of IP is enabled or/and notifications to admin are turned off.
@@ -42,6 +40,8 @@ comments: |
     The splunk query above shall be tuned to reflect a valid tenant name.
     Limit the detection to actions conducted from not white-listed IPs and/or particular users.
     Adjust the "where" clauses when needed, i.e. if admin notifications are supposed to be disabled and not triggering an alert (susp_ip_throttling_admin_notifications).
+tenant_logs: >
+    "type: "sapi" AND description: "Update Suspicious IP Throttling settings"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.

@@ -26,8 +26,6 @@ explanation: >
     If MFA is set to Never, this query returns one record.
     If MFA is set in Always or Use Adaptive MFA, no record is returned.
     The splunk query displays the modifying IP and user.
-tenant_logs: >
-    type: "sapi" AND description: "Update multi-factor authentication policies"
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="sapi" data.description="Update multi-factor authentication policies"
@@ -42,6 +40,8 @@ comments: >
     The splunk query above shall be tuned to reflect a valid tenant name.
     A possible false positive is when MFA policies are applied through Actions.
     Limit the detection to actions conducted from not allowlisted IPs and/or particular users.
+tenant_logs: >
+    type: "sapi" AND description: "Update multi-factor authentication policies"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
