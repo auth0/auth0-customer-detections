@@ -5,24 +5,24 @@ description: >
     Detect potential signup fraud by monitoring the use of disposable emails.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-08-18
 logsource:
     product: auth0
     service: signup
 detection:
     selection:
         data.type: "ss"
-        data.user_name:
-            - "*@mailinator.com"
-            - "*@yopmail.com"
-            - "*@10minutemail.com"
-            - "*@guerrillamail.com"
-            - "*@temp-mail.org"
-            - "*@disposable.com"
-            - "*@mailnesia.com"
-            - "*@sharklasers.com"
-            - "*@getnada.com"
-            - "*@mohmal.com"
+        data.user_name|endswith:
+            - "@mailinator.com"
+            - "@yopmail.com"
+            - "@10minutemail.com"
+            - "@guerrillamail.com"
+            - "@temp-mail.org"
+            - "@disposable.com"
+            - "@mailnesia.com"
+            - "@sharklasers.com"
+            - "@getnada.com"
+            - "@mohmal.com"
     condition: selection
 explanation: >
     The query monitors successful signups events within a selected time window and validates if a disposable email has been used. It alerts when the number of users with disposable emails exceeds a threshold.
