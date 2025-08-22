@@ -11,12 +11,12 @@ logsource:
     service: attack_protection
 detection:
     selection:
-        type: sapi
-        description:
+        data.type: sapi
+        data.description:
             - Update Brute-force settings
             - Create or update the anomaly detection captcha
             - Update Suspicious IP Throttling settings
-        details.request.body.enabled: 'false'
+        data.details.request.body.enabled: 'false'
     filter:
         data.details.response.body.enabled:
             - false

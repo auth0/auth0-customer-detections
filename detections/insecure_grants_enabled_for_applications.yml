@@ -29,7 +29,7 @@ splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="sapi" data.description="Update a client"
     ```Limiting to critical appllications```
-    ```data.details.response.body.client_id IN ('{critical-client_id-1}', '{critical-client_id-2}')
+    ```data.details.response.body.client_id IN ('{critical-client_id-1}', '{critical-client_id-2}')```
     data.details.response.statusCode=200
     data.details.response.body.grant_types{} IN ("implicit", "password")
     ```Display the information in a table```

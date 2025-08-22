@@ -16,7 +16,6 @@ references:
 detection:
     selection:
         data.type: sapi
-        data.tenant_name: '*'
         data.description:
             - Update Brute-force settings
             - Create or update the anomaly detection captcha
