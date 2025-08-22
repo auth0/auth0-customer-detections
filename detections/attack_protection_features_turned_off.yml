@@ -2,7 +2,8 @@ title: Attack protection features manipulation - some attack protection features
 id: 0325e11e-12ce-44e7-8d1f-3a64700a000a
 status: experimental
 description: >
-  This detection alerts when attack protection features have been disabled in the tenant's settings.  This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
+  This detection alerts when attack protection features have been disabled in the tenant's settings.
+  This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
@@ -11,12 +12,12 @@ logsource:
     service: attack_protection
 detection:
     selection:
-        type: sapi
-        description:
+        data.type: sapi
+        data.description:
             - Update Brute-force settings
             - Create or update the anomaly detection captcha
             - Update Suspicious IP Throttling settings
-        details.request.body.enabled: 'false'
+        data.details.request.body.enabled: 'false'
     filter:
         data.details.response.body.enabled:
             - false

@@ -2,7 +2,9 @@ title: High Risk Actions - copying of the most powerful token through API Explor
 id: 90a9a856-716d-11f0-bb81-723487b9527c
 status: experimental
 description: >
-    The Auth0 Dashboard generates automatically a special token that is authorized to use all available Management API scopes  (except for newly released scopes that shall be added manually). This token can be copied via Applications --> APIs --> Auth0 Management API --> API Explorer
+    The Auth0 Dashboard generates automatically a special token that is authorized to use all available Management API scopes
+    (except for newly released scopes that shall be added manually).
+    This token can be copied via Applications --> APIs --> Auth0 Management API --> API Explorer
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

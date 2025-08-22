@@ -2,7 +2,9 @@ title: Unrecognized IP in attack protection allowlists
 id: 5b7a6b8c-6e3b-11f0-a54c-723487b9527e
 status: experimental
 description: >
-    Detect when new IPs are added into any attack protection allowlist. Since allowlists suspend some controls, they should be closely monitored for unrecognized IPs. A threat actor can try to add a malicious IP in order to bypass attack protection features.
+    Detect when new IPs are added into any attack protection allowlist.
+    Since allowlists suspend some controls, they should be closely monitored for unrecognized IPs.
+    A threat actor can try to add a malicious IP in order to bypass attack protection features.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
@@ -16,14 +18,13 @@ references:
 detection:
     selection:
         data.type: sapi
-        data.tenant_name: '*'
         data.description:
             - Update Brute-force settings
             - Create or update the anomaly detection captcha
             - Update Suspicious IP Throttling settings
     filter:
         data.request.body.allowlist:
-            - '192.0.2.0/24'
+            - '192.0.2.0/24' # An example. Provide a list of allowed IPs or CIDRs.
     condition: selection and not filter
 explanation: >
     The query checks for log entries that modify settings related to brute-force protection, bot detection, or suspicious IP throttling.

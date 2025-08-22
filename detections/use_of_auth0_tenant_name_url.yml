@@ -3,7 +3,9 @@ id: 466073e8-7171-11f0-858f-723487b9527c
 status: experimental
 description: >
     Detect the use of Auth0 canonical domain/tenant name url, when a custom domain is configured.
-    When a custom domain is configured, there is often no reason for legitimate applications to use the default Auth0 domain. An attempt to access the tenant using the default Auth0 domain that may indicate a misconfiguration or an attack. Bypassing of a custom domain can lead to circumventing of such protections as WAF, IP filters, and advanced logging.
+    When a custom domain is configured, there is often no reason for legitimate applications to use the default Auth0 domain.
+    An attempt to access the tenant using the default Auth0 domain that may indicate a misconfiguration or an attack.
+    Bypassing of a custom domain can lead to circumventing of such protections as WAF, IP filters, and advanced logging.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
@@ -26,7 +28,8 @@ detection:
         data.hostname: "{your-tenant-url}"  # e.g. your-tenant.auth0.com
     condition: selection
 explanation: >
-  The query below collects log entries corresponding to authentication events, e.g. s-successful login, f-failed login, etc. It filters those requests that use the Auth0 tenant name URL by checking "data.hostname".
+  The query below collects log entries corresponding to authentication events, e.g. s-successful login, f-failed login, etc.
+  It filters those requests that use the Auth0 tenant name URL by checking "data.hostname".
   The splunk query below displays clints/applications and log references.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"

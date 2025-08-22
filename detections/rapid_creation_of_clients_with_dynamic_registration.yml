@@ -2,7 +2,8 @@ title: Rapid creation of clients with the dynamic client registration endpoint
 id: 4bf28f3a-716c-11f0-9932-723487b9527c
 status: experimental
 description: >
-    Detect when a large number of clients are created in a short period of time using dynamic client registration. This can indicate an attempt to create multiple clients for malicious purposes, such as denial of service, resource exhaustion, phishing (consent phishing) by creating look-alike applications, and causing admin fatigue by overwhelming the admin with clients.
+    Detect when a large number of clients are created in a short period of time using dynamic client registration.
+    This can indicate an attempt to create multiple clients for malicious purposes, such as denial of service, resource exhaustion, phishing (consent phishing) by creating look-alike applications, and causing admin fatigue by overwhelming the admin with clients.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
