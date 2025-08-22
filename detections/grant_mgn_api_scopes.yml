@@ -43,7 +43,8 @@ comments:
     - To reduce a number of alerts, the query can be adjusted to watch for a more critical set of scopes, e.g. focus on "delete:*", but not "read:*",
       and/or trigger alerts when scopes are granted to applications that are not on the list of trusted clients.
     - To get a full list of available Management APIs scope and their descriptions, you can go to Applications --> Auth0 Management API --> Permissions.
-    - To get an easier to copy list, you can go to Applications --> Auth0 Management API --> API Explorer --> Copy the token. Then go to Management API documentation (https://auth0.com/docs/api/management/v2), click "Set API Token" and paste the earlier copied token. Now, you see all scopes that are easy to copy and use in the splunk query given above.
+    - To get an easier to copy list, you can go to Applications --> Auth0 Management API --> API Explorer --> Copy the token. 
+      Then go to Management API documentation (https://auth0.com/docs/api/management/v2), click "Set API Token" and paste the earlier copied token. Now, you see all scopes that are easy to copy and use in the splunk query given above.
 tenant_logs: >
   type:"sapi" AND description: "Update client grant"
 prevention:

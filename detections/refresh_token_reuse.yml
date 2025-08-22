@@ -2,7 +2,9 @@ title: Refresh Token Reuse Detection
 id: a7b2e75c-7171-11f0-aa28-723487b9527c
 status: experimental
 description: >
-    This detection alerts when a refresh token is reused in an unsuccessful exchange attempt. Reusing refresh tokens can indicate an attempt to exploit the token or a misconfiguration in the application. This detection requires that the token rotation is enabled for an application.
+    This detection alerts when a refresh token is reused in an unsuccessful exchange attempt.
+    Reusing refresh tokens can indicate an attempt to exploit the token or a misconfiguration in the application.
+    This detection requires that the token rotation is enabled for an application.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

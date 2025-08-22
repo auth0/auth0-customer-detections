@@ -2,7 +2,7 @@ title: Risk for account takeover - same Guardian application device is registere
 id: bad8fcc0-716e-11f0-b852-723487b9527c
 status: experimental
 description: >
-    An adversary may register their own MFA devices, often leveraging the same device  for multiple compromised accounts to maintain persistence.
+    An adversary may register their own MFA devices, often leveraging the same device for multiple compromised accounts to maintain persistence.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

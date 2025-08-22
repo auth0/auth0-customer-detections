@@ -2,7 +2,8 @@ title: MFA Push Fatigue - detects when a user is repeatedly prompted for MFA pus
 id: e675f02e-716c-11f0-8602-723487b9527c
 status: experimental
 description: >
-    An adversary with access to compromised passwords may try to push bomb the victim. There is a chance that the victim will accept an MFA prompt to stop irritation.
+    An adversary with access to compromised passwords may try to push bomb the victim.
+    There is a chance that the victim will accept an MFA prompt to stop irritation.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

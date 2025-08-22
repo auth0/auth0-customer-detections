@@ -25,7 +25,8 @@ detection:
             - "@mohmal.com"
     condition: selection
 explanation: >
-    The query monitors successful signups events within a selected time window and validates if a disposable email has been used. It alerts when the number of users with disposable emails exceeds a threshold.
+    The query monitors successful signups events within a selected time window and validates if a disposable email has been used.
+    It alerts when the number of users with disposable emails exceeds a threshold.
 splunk: >
     index=auth0 data.type = "ss"
     | bin _time span=1h
