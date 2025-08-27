@@ -2,7 +2,8 @@ title: Suspicious IP Throttling - critical settings manipulated
 id: afb609fe-716f-11f0-b060-723487b9527c
 status: experimental
 description: >
-    A threat actor can manipulate the critical settings of Suspicious IP Throttling, such as disabling the feature or setting it to a monitoring mode where no blocking occurs. This can allow malicious IPs to bypass protections and continue attacks without being blocked.
+    A threat actor can manipulate the critical settings of Suspicious IP Throttling, such as disabling the feature or setting it to a monitoring mode where no blocking occurs.
+    This can allow malicious IPs to bypass protections and continue attacks without being blocked.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04

@@ -32,7 +32,8 @@ prevention:
     - Require strong MFA factors and do not allow factors such as email or SMS.
     - Deploy a send-phone-message action implementing a logic to validate that a phone number is registered only once.
 falsepositives:
-    - To filter out false positives, look at the users' emails or users' names. If the emails/names look similar, e.g. one personal email (jane.parker@gmail.com) and one work email (jparker@company.com),  then it is likely that the phone number is registered to multiple users intentionally.
+    - To filter out false positives, look at the users' emails or users' names. If the emails/names look similar, e.g. one personal email (jane.parker@gmail.com) and one work email (jparker@company.com),
+      then it is likely that the phone number is registered to multiple users intentionally.
 level: medium
 tags:
     - attack.persistence

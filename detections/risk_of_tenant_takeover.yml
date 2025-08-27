@@ -2,7 +2,7 @@ title: Risk of Tenant Takeover
 id: 711501ce-716e-11f0-8b6e-723487b9527c
 status: experimental
 description: >
-    Detect potential tenant takeover risks by monitoring if a new tenant admin has been invited  followed by rapid deletion of other Tenant Admins.
+    Detect potential tenant takeover risks by monitoring if a new tenant admin has been invited followed by rapid deletion of other Tenant Admins.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
