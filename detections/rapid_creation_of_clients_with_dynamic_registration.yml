@@ -17,7 +17,7 @@ detection:
     condition: selection
 explanation: >
     The query collects log entries captured when a client is created using dynamic client registration.
-    The splunk detection below observes the number of clients created within a specified time window.
+    The Splunk detection below observes the number of clients created within a specified time window.
     It alerts if an excessive number of clients, denoted by threshold_for_max_clients_created) have been created within a specified time window.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
@@ -35,7 +35,7 @@ splunk: >
     ```Display the information in a table```
     | table created_clients, created_within_mininutes, count_clients
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name, the threshold for the maximum number of clients created within a specified time window, i.e. {threshold_for_max_clients_created}, and the time window to observe, i.e. {threshold_for_observed_time_window_in_minutes}.
+    - The Splunk query above shall be tuned to reflect a valid tenant name, the threshold for the maximum number of clients created within a specified time window, i.e. {threshold_for_max_clients_created}, and the time window to observe, i.e. {threshold_for_observed_time_window_in_minutes}.
     - The time window can be adjusted based on the customer's environment and the expected number of clients.
 tenant_logs: >
     type:sapi AND description:"Dynamic client registration"

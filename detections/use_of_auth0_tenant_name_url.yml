@@ -30,20 +30,19 @@ detection:
 explanation: >
   The query below collects log entries corresponding to authentication events, e.g. s-successful login, f-failed login, etc.
   It filters those requests that use the Auth0 tenant name URL by checking "data.hostname".
-  The splunk query below displays clints/applications and log references.
+  The Splunk query below displays clints/applications and log references.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type IN ("s", "f", "fs", "ss", "w", "fp", "scoa", "fcoa", "sepft", "fepft")
     data.hostname="{your-tenant-url}"
     | table _time, data.client_id, data.client_name, data.log_id
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant_name.
+    - The Splunk query above shall be tuned to reflect a valid tenant_name.
 tenant_logs: >
     type: (s f fs ss f u fp scoa fcoa sepft fepft) AND hostname: {your-tenant-url}
 prevention: >
-    When any sort of a reverse proxy (e.g. WAF) is used in front of the tenant and IPs of this proxy can be listed,
-    Auth0 Network ACL (Access Control List) can be applied to block any entries from
-    unrecognized IPs.
+    - When any sort of a reverse proxy (e.g. WAF) is used in front of the tenant and IPs of this proxy can be listed,
+        Auth0 Network ACL (Access Control List) can be applied to block any entries from unrecognized IPs.
 falsepositives:
     - Legitimate use of the Auth0 tenant name URL, e.g. during testing or misconfiguration.
 level: low

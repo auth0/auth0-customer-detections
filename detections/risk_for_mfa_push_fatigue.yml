@@ -17,7 +17,7 @@ detection:
     condition: selection
 explanation: >
     The query below filters events capturing sending push notifications.
-    The suplunk query looks up additinal statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
+    The Splunk query looks up additinal statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
     It displays the IPs, number of affected users, and time window.
 splunk: >
     index=auth0 data.tenant_name="{your_tenant_name}"
@@ -30,7 +30,7 @@ splunk: >
     ```Display the information in a table```
     | table count_pushes_per_user, window_duration_mins, data.user_id, data.ip
 comments: >
-    The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent, i.e {time_window_threshold}, and  how many push notifications have been sent per user ({count_pushes_per_user_threshold}). A similar detection (with less details) can be implemented through Security Center and its alerts.
+    - The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent, i.e {time_window_threshold}, and  how many push notifications have been sent per user ({count_pushes_per_user_threshold}). A similar detection (with less details) can be implemented through Security Center and its alerts.
 tenant_logs: >
     type:"gd_send_pn" AND description: "Guardian - Second factor notification sent"
 prevention:

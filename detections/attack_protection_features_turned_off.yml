@@ -2,8 +2,8 @@ title: Attack protection features manipulation - some attack protection features
 id: 0325e11e-12ce-44e7-8d1f-3a64700a000a
 status: experimental
 description: >
-  This detection alerts when attack protection features have been disabled in the tenant's settings.
-  This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
+    This detection alerts when attack protection features have been disabled in the tenant's settings.
+    This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
@@ -25,7 +25,7 @@ detection:
 explanation: >
     The query collects the events indicating modification of settings for the three listed features.
     When the response body contains 'enabled' set to 'false', this indicates that a corresponding feature has been turned off.
-    The splunk query below lists the attack protection features that has been turned off.
+    The Splunk query below lists the attack protection features that has been turned off.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description IN ("Update Suspicious IP Throttling settings",
@@ -39,12 +39,12 @@ splunk: >
     ```Display the information in a table```
     | table event_type
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Adjust the detection to monitor the attack feature in use.
 tenant_logs: >
-  type: "sapi" AND (description: "Update Suspicious IP Throttling settings"
-  OR description: "Update Breached Password Detection settings"
-  OR description: "Update Brute-force settings")
+    type: "sapi" AND (description: "Update Suspicious IP Throttling settings"
+    OR description: "Update Breached Password Detection settings"
+    OR description: "Update Brute-force settings")
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify attack protection settings.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.

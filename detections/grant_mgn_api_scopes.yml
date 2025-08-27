@@ -39,14 +39,14 @@ splunk:
     ```Trigger an alert when scopes are granted to applications that are not on the list of allowed clients.```
     NOT data.details.response.body.client_id IN ({trusted-client_id-1}, {trusted-client_id-2})
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name, audience, monitored Management API scopes, and trusted client_ids.
+    - The Splunk query above shall be tuned to reflect a valid tenant name, audience, monitored Management API scopes, and trusted client_ids.
     - To reduce a number of alerts, the query can be adjusted to watch for a more critical set of scopes, e.g. focus on "delete:*", but not "read:*",
       and/or trigger alerts when scopes are granted to applications that are not on the list of trusted clients.
     - To get a full list of available Management APIs scope and their descriptions, you can go to Applications --> Auth0 Management API --> Permissions.
     - To get an easier to copy list, you can go to Applications --> Auth0 Management API --> API Explorer --> Copy the token.
-      Then go to Management API documentation (https://auth0.com/docs/api/management/v2), click "Set API Token" and paste the earlier copied token. Now, you see all scopes that are easy to copy and use in the splunk query given above.
+    - Then go to Management API documentation (https://auth0.com/docs/api/management/v2), click "Set API Token" and paste the earlier copied token. Now, you see all scopes that are easy to copy and use in the splunk query given above.
 tenant_logs: >
-  type:"sapi" AND description: "Update client grant"
+    type:"sapi" AND description: "Update client grant"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.

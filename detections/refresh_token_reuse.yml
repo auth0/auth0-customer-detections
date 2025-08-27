@@ -17,10 +17,10 @@ detection:
         data.description: "Unsuccessful Refresh Token exchange, reused refresh token detected"
     condition: selection
 explanation: >
-  The query collects events issued when reuse is detected, i.e. ferrt.
-  The splunk query below also collects the number of affected users and total amount of violations.
-  The alert is triggered when two criteria are met - 1. excessive number of violations is observed; 2. reuse is detected for too many users.
-  It displays affected users.
+    The query collects events issued when reuse is detected, i.e. ferrt.
+    The Splunk query below also collects the number of affected users and total amount of violations.
+    The alert is triggered when two criteria are met - 1. excessive number of violations is observed; 2. reuse is detected for too many users.
+    It displays affected users.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="ferrt"
@@ -32,7 +32,7 @@ splunk: >
     ```Show the affected users in a table```
     | table data.user_id
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name, and two thresholds.
+    - The Splunk query above shall be tuned to reflect a valid tenant name, and two thresholds.
     - The excessive_reuse_threshold is the number of reuse events for a single user that should trigger an alert.
     - The effected_users_threshold is the number of users that should be affected by the reuse to trigger an alert.
 tenant_logs: >

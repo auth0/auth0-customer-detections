@@ -16,15 +16,14 @@ detection:
         data.type: seccft
         data.client_id: "{api_explorer_client_id}"
     condition: selection
-explanation: >
-    The query simply collects entries issued when such a token is accessed via Dashboard.
+explanation: The query simply collects entries issued when such a token is accessed via Dashboard.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="seccft" data.client_id="{api_explorer_client_id}"
     ```Display the information in a table: user checking the secret and IP of this user```
     |  data.user_id, data.user_name, data.ip
 comments: >
-    The Splunk query above shall be tuned to reflect a valid tenant name and a client_id for the API Explorer application.
+    - The Splunk query above shall be tuned to reflect a valid tenant name and a client_id for the API Explorer application.
 tenant_logs: >
     type: "seccft" AND client_id: "{api_explorer_client_id}"
 prevention:

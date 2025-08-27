@@ -27,7 +27,7 @@ explanation: >
     The query collects the events indicating modification of settings for the Bot Detection.
     When the response body contains "policy", "passwordless_policy", or "password_reset_policy" set to "off",
     this indicates that a protection is turned off for the respective flow, i.e. password login, passwordless login, or password reset.
-    The splunk query provides details about IPs, where the change was done from, and values for the listed policies.
+    The Splunk query provides details about IPs, where the change was done from, and values for the listed policies.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi
@@ -40,11 +40,11 @@ splunk: >
     |table data.ip, data.details.response.body.policy, data.details.response.body.password_reset_policy,
     data.details.response.body.passwordless_policy
 comments: >
-    The splunk query above shall be tuned to reflect a valid tenant name.
-    Limit the detection to actions conducted from not white-listed IPs and/or particular users.
-    A possible extension of this detection is to monitor if CAPTCHA changes from, e.g. Auth Challenge, to a simple one.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
+    - A possible extension of this detection is to monitor if CAPTCHA changes from, e.g. Auth Challenge, to a simple one.
 tenant_logs: >
-  type:"sapi" AND description: "Create or update the anomaly detection captcha"
+    type:"sapi" AND description: "Create or update the anomaly detection captcha"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.

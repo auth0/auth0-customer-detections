@@ -21,7 +21,7 @@ splunk: >
     | stats dc(data.user_id) as users_count values(data.ip) by data.details.enrollment.identifier
     | where users_count > 1
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
     - For customer identity, the users can leverage the same MFA for several accounts for legitimate reasons, e.g. a user has several accounts in the same tenant across several applications.
     - To filter out false positives, look at the users' emails or users' names.
     - Also, consider adjusting the users_count to decrease sensitivity.

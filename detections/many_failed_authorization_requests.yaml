@@ -21,8 +21,8 @@ detection:
             - 'Service not found'
     condition: selection
 explanation: >
-  The query collects the failed login request entries. It monitors statistics for an unregistered redirect URI, unrecognized audience or client, unsupported response type or challenge type.
-  The splunk query below also provides the malformed values and counts a number of entries for each category. It alerts when the count for any of the categories exceeds a specified threshold.
+    The query collects the failed login request entries. It monitors statistics for an unregistered redirect URI, unrecognized audience or client, unsupported response type or challenge type.
+    The Splunk query below also provides the malformed values and counts a number of entries for each category. It alerts when the count for any of the categories exceeds a specified threshold.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type = "f"
@@ -39,7 +39,7 @@ splunk: >
     | table Field, Value, Count
     | where Count > {threshold}
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
     - The values for threshold should be set based on the customer's environment and expected behavior that should be close to 0 when all applications are configured correctly.
 tenant_logs: >
     type:"f" AND description:*mismatch*

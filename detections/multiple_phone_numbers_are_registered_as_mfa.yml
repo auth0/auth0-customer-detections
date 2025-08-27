@@ -16,7 +16,7 @@ detection:
     condition: selection
 explanation: >
     The query below collects entries from the tenant logs where the phone number is registered.
-    The splunk query below groups users by a phone number, i.e. collects users with the same phone number.
+    The Splunk query below groups users by a phone number, i.e. collects users with the same phone number.
     It returns phone numbers where the number of users is greater than 1.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
@@ -25,7 +25,7 @@ splunk: >
     | stats dc(data.user_id) as users_count values(data.ip) by data.details.authenticator.phone_number
     | where users_count > 1
 comments: >
-    The Splunk query above shall be tuned to reflect a valid tenant_name.
+    - The Splunk query above shall be tuned to reflect a valid tenant_name.
 tenant_logs: >
     type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete (sms)"
 prevention:

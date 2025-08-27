@@ -17,9 +17,9 @@ detection:
     condition: selection
 explanation: >
     The query filters for log entries recording changes in availability of MFA factors for the whole tenant.
-    The splunk query below also parses the path where the last part shows the type of the disabled factor.
+    The Splunk query below also parses the path where the last part shows the type of the disabled factor.
     The alert is triggered when a monitored type, e.g. phishing-resistant, of a factor is observed.
-    The splunk query summarises the user created modification and its IP and lists disabled factors.
+    The Splunk query summarises the user created modification and its IP and lists disabled factors.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="sapi" data.description="Update multi-factor authentication type"
@@ -32,9 +32,9 @@ splunk: >
     ```Display the information in a table```
     |table data.user_id, data.details.request.ip, factor
 comments: >
-    The splunk query above, shall be tuned to reflect a valid tenant name.
-    Additionally, you can expand the detection to other factors, e.g. SMS.
-    Limit the detection to actions conducted from untrusted IPs and/or particular users.
+    - The Splunk query above, shall be tuned to reflect a valid tenant name.
+    - Additionally, you can expand the detection to other factors, e.g. SMS.
+    - Limit the detection to actions conducted from untrusted IPs and/or particular users.
 tenant_logs: >
     type: "sapi" AND description: "Update multi-factor authentication type"
 prevention:

@@ -23,7 +23,7 @@ detection:
 explanation: >
     The query filters for modifications of the Brute Force Protection feature.
     It returns records when the feature is completely disabled, i.e. the "shields" attribute does not contain "block" or set into a monitoring mode by disabling all responses.
-    The splunk query below considers only the last modification and summarises a modifying IP, what mode is enabled, i.e. blocking an account just this IP or regardless, the state of user notifications.
+    The Splunk query below considers only the last modification and summarises a modifying IP, what mode is enabled, i.e. blocking an account just this IP or regardless, the state of user notifications.
 splunk: >
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description = "Update Brute-force settings"
@@ -49,9 +49,9 @@ splunk: >
     ```Display the information in a table```
     | table _time, data.ip, brute_force_enabled, brute_force_only_ip_specific_blocking, brute_force_regardless_ip_blocking, brute_force_user_notifications_on, brute_force_all_responses_disabled
 comments: >
-    The splunk query above shall be tuned to reflect a valid tenant name.
-    Limit the detection to actions conducted from not white-listed IPs and/or particular users.
-    Additionally, you can also alert when user notifications are turned off indicated by 'brute_force_user_notifications_on = "false"'' by modifying a respective "where" clause.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
+    - Additionally, you can also alert when user notifications are turned off indicated by 'brute_force_user_notifications_on = "false"'' by modifying a respective "where" clause.
 tenant_logs: >
     type: "sapi" AND description: "Update Brute-force settings"
 prevention:
