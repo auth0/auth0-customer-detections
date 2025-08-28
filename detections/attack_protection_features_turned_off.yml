@@ -1,7 +1,7 @@
 title: Attack protection features manipulation - some attack protection features have been disabled.
 id: 0325e11e-12ce-44e7-8d1f-3a64700a000a
 status: experimental
-description: >
+description: |
     This detection alerts when attack protection features have been disabled in the tenant's settings.
     This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
 author: Okta
@@ -26,7 +26,7 @@ explanation: >
     The query collects the events indicating modification of settings for the three listed features.
     When the response body contains 'enabled' set to 'false', this indicates that a corresponding feature has been turned off.
     The Splunk query below lists the attack protection features that has been turned off.
-splunk: >
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description IN ("Update Suspicious IP Throttling settings",
     "Update Breached Password Detection settings", "Update Brute-force settings")
@@ -41,7 +41,7 @@ splunk: >
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Adjust the detection to monitor the attack feature in use.
-tenant_logs: >
+tenant_logs: |
     type: "sapi" AND (description: "Update Suspicious IP Throttling settings"
     OR description: "Update Breached Password Detection settings"
     OR description: "Update Brute-force settings")

@@ -1,7 +1,7 @@
 title: Suspicious IP Throttling - critical settings manipulated
 id: afb609fe-716f-11f0-b060-723487b9527c
 status: experimental
-description: >
+description: |
     A threat actor can manipulate the critical settings of Suspicious IP Throttling, such as disabling the feature or setting it to a monitoring mode where no blocking occurs.
     This can allow malicious IPs to bypass protections and continue attacks without being blocked.
 author: Okta
@@ -22,9 +22,10 @@ detection:
     condition: selection or filter
 explanation: >
     The query filters for an event indicating a change of Suspicious IP Throttling settings.
-    The splunk query below alerts when the feature is completely disabled or set into a monitoring mode,  i.e. no blocking of IP is enabled or/and notifications to admin are turned off.
+    The splunk query below alerts when the feature is completely disabled or set into a monitoring mode,
+    i.e. no blocking of IP is enabled or/and notifications to admin are turned off.
     It displays the modifying IP, the enabled mode, and that staus of admin notifications.
-splunk: >
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="sapi" data.description="Update Suspicious IP Throttling settings"
     | rename data.details.response.body.shields{} as shields
@@ -37,11 +38,11 @@ splunk: >
             susp_ip_throttling_admin_notifications="false"))
         ```Display the information in a table```
     | table data.ip, shields, susp_ip_throttling_enabled, susp_ip_throttling_blocking, susp_ip_throttling_admin_notifications
-comments: |
+comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
     - Adjust the "where" clauses when needed, i.e. if admin notifications are supposed to be disabled and not triggering an alert (susp_ip_throttling_admin_notifications).
-tenant_logs: >
+tenant_logs: |
     type: "sapi" AND description: "Update Suspicious IP Throttling settings"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.

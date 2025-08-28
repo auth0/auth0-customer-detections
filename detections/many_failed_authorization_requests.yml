@@ -1,7 +1,7 @@
 title: Too many failed authorization requests due to wrong parameters
 id: 27d3b46e-3a2e-48e9-95bb-4622101572b9
 status: experimental
-description: >
+description: |
     Detect when a request for authorization provides an unregistered redirect URI, audience, client, unsupported response type, or unsupported challenge type.
     An adversary may try to harvest authorization codes for exchanging them for tokens later, or simply conducting a denial-of-service attack by depleting the rate limit.
 author: Okta
@@ -21,9 +21,11 @@ detection:
             - 'Service not found'
     condition: selection
 explanation: >
-    The query collects the failed login request entries. It monitors statistics for an unregistered redirect URI, unrecognized audience or client, unsupported response type or challenge type.
-    The Splunk query below also provides the malformed values and counts a number of entries for each category. It alerts when the count for any of the categories exceeds a specified threshold.
-splunk: >
+    The query collects the failed login request entries.
+    It monitors statistics for an unregistered redirect URI, unrecognized audience or client, unsupported response type or challenge type.
+    The Splunk query below also provides the malformed values and counts a number of entries for each category.
+    It alerts when the count for any of the categories exceeds a specified threshold.
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type = "f"
     data.description IN ("*is not supported by this server*", "*mismatch*", "*Unknown client*", "*Unsupported response type*", "*Service not found*")
@@ -32,7 +34,8 @@ splunk: >
     | rex "\"Unknown client: (?<malformed_client>[^\"]*)\""
     | rex "\"Unsupported response type: (?<malformed_response_type>[^\"]*)\""
     | rex "\"Service not found: (?<malformed_audience>[^\"]*)\""
-    | stats values(malformed_uri) as malformed_uri, values(malformed_challenge_type) as malformed_challenge_type, values(malformed_client) as malformed_client, values(malformed_response_type) as malformed_response_type, values(malformed_audience) as malformed_audience
+    | stats values(malformed_uri) as malformed_uri, values(malformed_challenge_type) as malformed_challenge_type, values(malformed_client) as malformed_client,
+      values(malformed_response_type) as malformed_response_type, values(malformed_audience) as malformed_audience
     | transpose
     | rename "column" as Field, "row 1" as Value
     | eval Count=mvcount(Value)
@@ -40,8 +43,9 @@ splunk: >
     | where Count > {threshold}
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
-    - The values for threshold should be set based on the customer's environment and expected behavior that should be close to 0 when all applications are configured correctly.
-tenant_logs: >
+    - The values for threshold should be set based on the customer's environment and expected behavior
+      that should be close to 0 when all applications are configured correctly.
+tenant_logs: |
     type:"f" AND description:*mismatch*
 prevention:
     - Utilize Bot detection to prevent scripted attacks.

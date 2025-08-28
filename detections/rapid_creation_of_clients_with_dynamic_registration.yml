@@ -1,9 +1,10 @@
 title: Rapid creation of clients with the dynamic client registration endpoint
 id: 4bf28f3a-716c-11f0-9932-723487b9527c
 status: experimental
-description: >
+description: |
     Detect when a large number of clients are created in a short period of time using dynamic client registration.
-    This can indicate an attempt to create multiple clients for malicious purposes, such as denial of service, resource exhaustion, phishing (consent phishing) by creating look-alike applications, and causing admin fatigue by overwhelming the admin with clients.
+    This can indicate an attempt to create multiple clients for malicious purposes, such as denial of service, resource exhaustion,
+    phishing (consent phishing) by creating look-alike applications, and causing admin fatigue by overwhelming the admin with clients.
 author: Okta
 date: 2025-07-11
 modified: 2025-08-04
@@ -19,7 +20,7 @@ explanation: >
     The query collects log entries captured when a client is created using dynamic client registration.
     The Splunk detection below observes the number of clients created within a specified time window.
     It alerts if an excessive number of clients, denoted by threshold_for_max_clients_created) have been created within a specified time window.
-splunk: >
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description="Dynamic client registration"
     | eval original_time = _time
@@ -35,9 +36,10 @@ splunk: >
     ```Display the information in a table```
     | table created_clients, created_within_mininutes, count_clients
 comments:
-    - The Splunk query above shall be tuned to reflect a valid tenant name, the threshold for the maximum number of clients created within a specified time window, i.e. {threshold_for_max_clients_created}, and the time window to observe, i.e. {threshold_for_observed_time_window_in_minutes}.
+    - The Splunk query above shall be tuned to reflect a valid tenant name, the threshold for the maximum number of clients created within a specified time window,
+      i.e. {threshold_for_max_clients_created}, and the time window to observe, i.e. {threshold_for_observed_time_window_in_minutes}.
     - The time window can be adjusted based on the customer's environment and the expected number of clients.
-tenant_logs: >
+tenant_logs: |
     type:sapi AND description:"Dynamic client registration"
 prevention:
     - Harden access to the dynamic client registration (DCR) endpoint with Auth0 Tenant ACL or by placing a specialised WAF in front of your tenant.

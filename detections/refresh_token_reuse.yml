@@ -1,7 +1,7 @@
 title: Refresh Token Reuse Detection
 id: a7b2e75c-7171-11f0-aa28-723487b9527c
 status: experimental
-description: >
+description: |
     This detection alerts when a refresh token is reused in an unsuccessful exchange attempt.
     Reusing refresh tokens can indicate an attempt to exploit the token or a misconfiguration in the application.
     This detection requires that the token rotation is enabled for an application.
@@ -21,7 +21,7 @@ explanation: >
     The Splunk query below also collects the number of affected users and total amount of violations.
     The alert is triggered when two criteria are met - 1. excessive number of violations is observed; 2. reuse is detected for too many users.
     It displays affected users.
-splunk: >
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="ferrt"
     data.description="Unsuccessful Refresh Token exchange, reused refresh token detected"
@@ -35,13 +35,14 @@ comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name, and two thresholds.
     - The excessive_reuse_threshold is the number of reuse events for a single user that should trigger an alert.
     - The effected_users_threshold is the number of users that should be affected by the reuse to trigger an alert.
-tenant_logs: >
+tenant_logs: |
     type: "ferrt" AND description: "Unsuccessful Refresh Token exchange, reused refresh token detected"
 prevention:
     - Ensure that the application uses refresh tokens correctly to exclude misconfiguration as a cause of the reuse.
     - When tokens are requested by a frontend application, i.e. SPA, ensure that the application is not vulnerable to XSS that leads to token theft.
     - Terminate sessions for affected users to pause the attack, however, it might come back when the user logs in again.
-    - Deploy a post-login action that will compare IP/ASN of initial issuing of a refresh token and IP/ASN of the current refresh token. If they are different, terminate the session and revoke all refresh tokens.
+    - Deploy a post-login action that will compare IP/ASN of initial issuing of a refresh token and IP/ASN of the current refresh token.
+      If they are different, terminate the session and revoke all refresh tokens.
 falsepositives:
     - Misconfigured applications that are caching refresh tokens.
 level: medium
