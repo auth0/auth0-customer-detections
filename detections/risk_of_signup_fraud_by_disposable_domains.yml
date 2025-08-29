@@ -1,7 +1,7 @@
 title: Risk of signup fraud - rapid creation of fake accounts with disposable email domains
 id: e92605d8-716d-11f0-b2ae-723487b9527c
 status: experimental
-description: >
+description: |
     Detect potential signup fraud by monitoring the use of disposable emails.
 author: Okta
 date: 2025-07-11
@@ -27,7 +27,7 @@ detection:
 explanation: >
     The query monitors successful signups events within a selected time window and validates if a disposable email has been used.
     It alerts when the number of users with disposable emails exceeds a threshold.
-splunk: >
+splunk: |
     index=auth0 data.type = "ss"
     | bin _time span=1h
     | search data.user_name IN ("*@mailinator.com", "*@yopmail.com", "*@10minutemail.com",
@@ -41,7 +41,7 @@ comments:
     - The value for thresholds_disposable_emails should be set based on the customer's environment and expected behavior.
     - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate the thresholds based on the observed data.
     - The query can be adjusted to account for a longer public blocklist, e.g. available on github, using a lookup table.
-tenant_logs:
+tenant_logs: |
     type:"fs" OR type:"ss" OR type:"signup_pwd_leak"
 prevention:
     - Use pre-registration actions to block any registration with disposable emails.

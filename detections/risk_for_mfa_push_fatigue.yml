@@ -1,7 +1,7 @@
 title: MFA Push Fatigue - detects when a user is repeatedly prompted for MFA push.
 id: e675f02e-716c-11f0-8602-723487b9527c
 status: experimental
-description: >
+description: |
     An adversary with access to compromised passwords may try to push bomb the victim.
     There is a chance that the victim will accept an MFA prompt to stop irritation.
 author: Okta
@@ -17,7 +17,7 @@ detection:
     condition: selection
 explanation: >
     The query below filters events capturing sending push notifications.
-    The suplunk query looks up additinal statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
+    The Splunk query looks up additinal statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
     It displays the IPs, number of affected users, and time window.
 splunk: >
     index=auth0 data.tenant_name="{your_tenant_name}"
@@ -29,9 +29,11 @@ splunk: >
     | where window_duration_mins<={time_window_threshold} AND count_pushes_per_user > {count_pushes_per_user_threshold}
     ```Display the information in a table```
     | table count_pushes_per_user, window_duration_mins, data.user_id, data.ip
-comments: >
-    The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent, i.e {time_window_threshold}, and  how many push notifications have been sent per user ({count_pushes_per_user_threshold}). A similar detection (with less details) can be implemented through Security Center and its alerts.
-tenant_logs: >
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent,
+      i.e {time_window_threshold}, and  how many push notifications have been sent per user ({count_pushes_per_user_threshold}).
+    - A similar detection (with less details) can be implemented through Security Center and its alerts.
+tenant_logs: |
     type:"gd_send_pn" AND description: "Guardian - Second factor notification sent"
 prevention:
     - Enforcing strong MFA authenticators such as phishing-resistance with FIDO2 WebAuthn.

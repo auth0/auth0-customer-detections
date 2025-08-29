@@ -82,9 +82,24 @@ In [2]: with open('detections/breached_password_detection_settings_manipulated.y
    ...:     detection = yaml.safe_load(f)
    ...:
 
-In [3]: detection['splunk'].strip()
-Out[3]: 'index=auth0 data.tenant_name="{your-tenant-name}" data.type=sapi data.description="Update Breached Password Detection settings" ```Take only the last change of configurations that reflects the current settings``` | sort - _time | head 1 | rename data.details.response.body.shields{} as login_shields | rename data.details.response.body.enabled as breached_protection_enabled | rename data.details.response.body.stage.pre-user-registration.shields{} as signup_shields | eval user_notifications_on = if(isnotnull(mvfind(login_shields, "user_notification")), "true", "false") | eval login_flow_is_protected = if(isnotnull(mvfind(login_shields, "block")), "true", "false") | eval signup_flow_is_protected = if(isnotnull(mvfind(signup_shields, "block")), "true", "false") ```Alert when breached password protection is completely disabled or all responses are disabled (login, signup). Note: pwd reset is masked by now.``` | where breached_protection_enabled = "false" OR (login_flow_is_protected = "false" AND signup_flow_is_protected = "false") ```Display the information in a table``` | table _time, breached_protection_enabled, login_shields, user_notifications_on, signup_shields, login_flow_is_protected, signup_flow_is_protected, data.ip'
-```
+In [3]: print(detection['splunk'].strip())
+index=auth0 data.tenant_name="{your-tenant-name}"
+data.type=sapi data.description="Update Breached Password Detection settings"
+``` Excluding white-listed IPs```
+``` NOT data.ip IN ("{white-listed-IPs}")```
+```Take only the last change of configurations that reflects the current settings```
+| sort - _time
+| head 1
+| rename data.details.response.body.shields{} as login_shields
+| rename data.details.response.body.enabled as breached_protection_enabled
+| rename data.details.response.body.stage.pre-user-registration.shields{} as signup_shields
+| eval user_notifications_on = if(isnotnull(mvfind(login_shields, "user_notification")), "true", "false")
+| eval login_flow_is_protected = if(isnotnull(mvfind(login_shields, "block")), "true", "false")
+| eval signup_flow_is_protected = if(isnotnull(mvfind(signup_shields, "block")), "true", "false")
+```Alert when breached password protection is completely disabled or all responses are disabled (login, signup). Note: pwd reset is masked by now.```
+| where breached_protection_enabled = "false" OR (login_flow_is_protected = "false" AND signup_flow_is_protected = "false")
+```Display the information in a table```
+| table _time, data.ip, breached_protection_enabled, login_flow_is_protected, signup_flow_is_protected, user_notifications_on```
 
 [secblog]: https://sec.okta.com/articles
 [advisories]: https://trust.okta.com/security-advisories/

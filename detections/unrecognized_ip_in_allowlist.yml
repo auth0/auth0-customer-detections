@@ -1,7 +1,7 @@
 title: Unrecognized IP in attack protection allowlists
 id: 5b7a6b8c-6e3b-11f0-a54c-723487b9527e
 status: experimental
-description: >
+description: |
     Detect when new IPs are added into any attack protection allowlist.
     Since allowlists suspend some controls, they should be closely monitored for unrecognized IPs.
     A threat actor can try to add a malicious IP in order to bypass attack protection features.
@@ -29,8 +29,8 @@ detection:
 explanation: >
     The query checks for log entries that modify settings related to brute-force protection, bot detection, or suspicious IP throttling.
     It collects allowed IPs from the request body and looks them up.
-    The splunk detection is based on the assumption that the recognized IP addresses are maintained in an external file.
-splunk: >
+    The Splunk detection is based on the assumption that the recognized IP addresses are maintained in an external file.
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="sapi"
     data.description IN ("Update Brute-force settings", "Create or update the anomaly detection captcha",
@@ -42,10 +42,10 @@ splunk: >
     | dedup allowed_ips
     ```Display the information in a table```
     | stats values(allowed_ips) as ips_not_in_csv
-comments: >
-    The splunk query above shall be tuned to reflect a valid tenant name and the file name containing recognized IPs,
-    i.e. IPs allowed to be excluded from the Attack protection features.
-tenant_logs: >
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name and the file name containing recognized IPs,
+        i.e. IPs allowed to be excluded from the Attack protection features.
+tenant_logs: |
     type:"sapi" AND (description: "Create or update the anomaly detection captcha"
     OR description: "Update Brute-force settings"
     OR description: "Update Suspicious IP Throttling settings")
@@ -55,7 +55,8 @@ prevention:
     - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
 falsepositives:
-    - Legitimate updates by an administrator. This rule is designed for threat hunting and to be a starting point for further investigation. It is expected to be correlated with a list of known/trusted IPs.
+    - Legitimate updates by an administrator. This rule is designed for threat hunting and to be a starting point for further investigation.
+      It is expected to be correlated with a list of known/trusted IPs.
 level: medium
 tags:
     - attack.defense-evasion

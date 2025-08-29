@@ -1,7 +1,7 @@
 title: Insecure OAuth2.x flows have been enabled for some applications
 id: 7b4ec6f9-fdae-4e35-8c5c-8daaf473220c
 status: experimental
-description: >
+description: |
     Detect when applications' configurations have been updated with insecure grant types, e.g. implicit and resource owner password grant.
     According to the recent update OAuth2.1 and RFC 9700, these flows shall be avoided.
 author: Okta
@@ -24,8 +24,8 @@ detection:
 explanation: >
     The query collects log records issued when any of the configurations for an application are updated.
     It filters for grant types if it contains implicit and/or password (Resource Owner Password Grant).
-    The splunk query below displays modifying IP and modified client_id where insecure grants have been enabled.
-splunk: >
+    The Splunk query below displays modifying IP and modified client_id where insecure grants have been enabled.
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type="sapi" data.description="Update a client"
     ```Limiting to critical appllications```
@@ -35,9 +35,9 @@ splunk: >
     ```Display the information in a table```
     |table data.ip, data.details.response.body.client_id, data.details.response.body.grant_types{}
 comments:
-    - The splunk query above shall be tuned to reflect a valid tenant name.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Limit this detection to monitoring a critical set of applications.
-tenant_logs: >
+tenant_logs: |
     type:"sapi" AND description: "Update a client"
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.

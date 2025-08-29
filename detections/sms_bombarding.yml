@@ -1,7 +1,7 @@
 title: MFA attack - bombarding a user with SMS for MFA
 id: 74a1ddea-7172-11f0-ace0-723487b9527c
 status: experimental
-description: >
+description: |
     A threat actor can try to bombard a user with SMS messages for MFA in order to deplete the customer's SMS quota leading to Denial of Service.
 author: Okta
 date: 2025-07-11
@@ -16,20 +16,21 @@ detection:
     condition: selection
 explanation: >
     The query collects events issued when a sms is sent.
-    The splunk detection is based on the number of SMS sent to a single user in a given period of time.
+    The Splunk detection is based on the number of SMS sent to a single user in a given period of time.
     If a number of SMS sent to a user exceeds a threshold, it is likely that the user is bombarded with SMS messages.
     The threshold can be adjusted based on the customer's environment and the expected number of SMS messages sent to a user.
     The query prints the affected users.
-splunk: >
+splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.description="Guardian - Second factor sms sent"
     ```The period of observations - adjust```
     | bin _time span=1h
     | stats count as sms_per_user by data.user_id
     | where sms_per_user > {threshold_for_max_sms}
-comments: >
-    The splunk query above shall be tuned to reflect a valid tenant_name, threshold, e.g. 10, and the span of the considered time period, e.g. set to 1 hour by default.
-tenant_logs: >
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant_name, threshold,
+      e.g. 10, and the span of the considered time period, e.g. set to 1 hour by default.
+tenant_logs: |
     type: "gd_send_sms" AND description: "Guardian - Second factor sms sent"
 prevention:
     - Limit the number of SMS messages sent to a user in a given period of time.

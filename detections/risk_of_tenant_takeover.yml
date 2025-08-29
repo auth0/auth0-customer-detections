@@ -1,7 +1,7 @@
 title: Risk of Tenant Takeover
 id: 711501ce-716e-11f0-8b6e-723487b9527c
 status: experimental
-description: >
+description: |
     Detect potential tenant takeover risks by monitoring if a new tenant admin has been invited followed by rapid deletion of other Tenant Admins.
 author: Okta
 date: 2025-07-11
@@ -18,9 +18,9 @@ detection:
         data.details.request.body.roles{}: owner
     condition: selection
 explanation: >
-    The query below monitors events issued when a new admin is invited, i.e., "Create tenant invitations for a given client", as owner
+    The query monitors events issued when a new admin is invited, i.e., "Create tenant invitations for a given client", as owner
     followed by rapid deletion of other admins, i.e. "Delete tenant member".
-    In the splunk query below the observed window is set to 1h - adjust according to your needs.
+    In the Splunk query below the observed window is set to 1h - adjust according to your needs.
     This query also implements other indicators to limit false positives.
     1. Used the invited admin a personal account instead of a corporate?
     2. How many admins have been deleted (set to more than 2)?
@@ -68,12 +68,12 @@ splunk: |
         AND has_personal_invited_email="true"
         ``` AND has_noncorporate_invited_email = "true" ```
         AND deleting_among_invited="false"
-comments: >
-    The splunk query above shall be tuned to reflect a valid tenant name.
-    When Auth0 Teams is used all admin related logs are removed from the tenant audit logs.
-    The events of inviting an admin into the Team and assigning this user to a tenant (and deleting events) are recorded in the Team Activity dashboard.
-    However, log streaming and search are not supported for Teams as of time of writing.
-tenant_logs: >
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - When Auth0 Teams is used all admin related logs are removed from the tenant audit logs.
+    - The events of inviting an admin into the Team and assigning this user to a tenant (and deleting events) are recorded in the Team Activity dashboard.
+    - However, log streaming and search are not supported for Teams as of time of writing.
+tenant_logs: |
     type:"sapi" AND (description:"Delete tenant member" OR description:"Create tenant invitations for a given client")
 prevention:
     - Enforce SSO for admins via Teams.
