@@ -26,28 +26,27 @@ explanation: >
     The query collects the events indicating modification of settings for the three listed features.
     When the response body contains 'enabled' set to 'false', this indicates that a corresponding feature has been turned off.
     The Splunk query below lists the attack protection features that has been turned off.
+    By removing the "where" clause, the query can be used to report the current status of all three features.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description IN ("Update Suspicious IP Throttling settings",
     "Update Breached Password Detection settings", "Update Brute-force settings")
-    data.details.response.body.enabled=false
-    | fields 'data.description', _time
-    | eval event_type = case(
-      'data.description'="Update Suspicious IP Throttling settings", "Suspicious IP Throttling has been disabled",
-      'data.description'="Update Breached Password Detection settings", "Breached Password Detection has been disabled",
-      'data.description'="Update Brute-force settings", "Brute-force has been disabled"
+    | eval feature_type = case(
+      'data.description'="Update Suspicious IP Throttling settings", "Suspicious IP Throttling",
+      'data.description'="Update Breached Password Detection settings", "Breached Password Detection",
+      'data.description'="Update Brute-force settings", "Brute-force"
       )
-    ```Display the information in a table```
-    | stats count by event_type
-    | eval Status="Disabled"
-    | append 
-              [ | makeresults
-                | eval mv_event_type=split("Suspicious IP Throttling has been disabled,Breached Password Detection has been disabled,Brute-force has been disabled", ",")
-                | mvexpand mv_event_type
-                | eval event_type=mv_event_type, Status="Enabled"
-                | fields event_type, Status
-              ]
-    | stats max(Status) as Status by event_type
+    ```Take only the last modifications of settings for each feature```
+    | sort -_time
+    | dedup feature_type
+    | eval status = case ('data.details.response.body.enabled' = "false", "disabled",
+    'data.details.response.body.enabled' = "true", "enabled")
+    | fields _time, status, feature_type, data.ip
+    ``` for reporting purposes remove the "where" clause below and it will display the current
+    status of all three protection features```
+    | where status = "disabled"
+    ``` Display the results printing out timestamp, modifying IP, feature reference, and its status```
+    | stats by _time, data.ip, feature_type, status
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Adjust the detection to monitor the attack feature in use.
