@@ -99,7 +99,8 @@ data.type=sapi data.description="Update Breached Password Detection settings"
 ```Alert when breached password protection is completely disabled or all responses are disabled (login, signup). Note: pwd reset is masked by now.```
 | where breached_protection_enabled = "false" OR (login_flow_is_protected = "false" AND signup_flow_is_protected = "false")
 ```Display the information in a table```
-| table _time, data.ip, breached_protection_enabled, login_flow_is_protected, signup_flow_is_protected, user_notifications_on```
+| table _time, data.ip, breached_protection_enabled, login_flow_is_protected, signup_flow_is_protected, user_notifications_on
+```
 
 [secblog]: https://sec.okta.com/articles
 [advisories]: https://trust.okta.com/security-advisories/
