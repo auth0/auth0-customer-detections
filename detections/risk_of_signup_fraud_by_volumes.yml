@@ -6,7 +6,7 @@ description: |
     or too many signup attempts with use of breached passwords.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: signup
@@ -18,16 +18,22 @@ detection:
             - "signup_pwd_leak"
     condition: selection
 explanation: >
-    The query alerts when one of the thresholds exceeds - number of successful signups, failed signups, or signups attempts with breached passwords.
+    The query collects log entries with successful/failed signups as well as signup attempts where leaked credentials were attempted.
+    The Splunk query alerts when one of the thresholds exceeds - number of successful signups, failed signups, or signups attempts with breached passwords.
+    The query can be limited to, for example, only successful signups surge by commenting respective "where" clauses.
 splunk: |
-    index=auth0 data.type IN ("fs","ss","signup_pwd_leak")
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type IN ("fs","ss","signup_pwd_leak")
     | bin _time span=1h
-    | chart count by _time, data.type
+    | stats count(eval('data.type'="fs")) as count_fs,
+        count(eval('data.type'="ss")) as count_ss,
+        count(eval('data.type'="signup_pwd_leak")) as count_signup_pwd_leak
+        by _time
     | fillnull value=0
-    | rename fs as count_fs, ss as count_ss, signup_pwd_leak as count_signup_pwd_leak
     | where count_fs >= {thresholds_failed_signups}
     | where count_ss >= {thresholds_successful_signups}
     | where count_signup_pwd_leak >= {thresholds_leaked_pwd}
+    | table _time, count_fs, count_ss, count_signup_pwd_leak
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - The values for thresholds_failed_signups, thresholds_successful_signups, and thresholds_leaked_pwd should be set based on the customer's environment and expected behavior.

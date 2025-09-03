@@ -24,19 +24,27 @@ detection:
 explanation: >
     The query collects log records issued when any of the configurations for an application are updated.
     It filters for grant types if it contains implicit and/or password (Resource Owner Password Grant).
-    The Splunk query below displays modifying IP and modified client_id where insecure grants have been enabled.
+    The Splunk query below takes the last update of settings for each application/client.
+    It alerts those where implicit and/or resource owner grants are present in the last modification, thus active settings.
+    The query displays modifying IP and modified client_id where insecure grants have been enabled.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type="sapi" data.description="Update a client"
+    data.type=sapi data.description="Update a client"
+    data.details.response.statusCode=200
     ```Limiting to critical appllications```
     ```data.details.response.body.client_id IN ('{critical-client_id-1}', '{critical-client_id-2}')```
-    data.details.response.statusCode=200
-    data.details.response.body.grant_types{} IN ("implicit", "password")
+    | fields _time, data.ip, data.details.response.body.client_id, data.details.response.body.grant_types{}
+    ```Take only the last change of configurations that reflects the current settings```
+    | sort -_time, data.details.response.body.client_id
+    | dedup data.details.response.body.client_id
+    | spath path=data.details.response.body.grant_types{} output=allowed_grants
+    | where allowed_grants IN ("implicit", "password")
     ```Display the information in a table```
-    |table data.ip, data.details.response.body.client_id, data.details.response.body.grant_types{}
+    | table _time, data.ip, data.details.response.body.client_id, data.details.response.body.grant_types{}
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Limit this detection to monitoring a critical set of applications.
+    - This Splunk query can be adjusted to report the actual configurations for all applications by removing the "where" clauses.
 tenant_logs: |
     type:"sapi" AND description: "Update a client"
 prevention:

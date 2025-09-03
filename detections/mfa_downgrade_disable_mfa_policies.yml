@@ -5,7 +5,7 @@ description: |
     Detect when the MFA policy is turned off by setting it to "Never".
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-01
 logsource:
     product: auth0
     service: mfa
@@ -21,22 +21,30 @@ detection:
     condition: selection and (filter_1 or filter_2)
 explanation: >
     The query filters for modifications of MFA settings by checking if any policies are enabled either as Always
-    ('all-applications') or When Risky ('confidence-score').
+    ('all-applications') or Use Adaptive MFA ('confidence-score').
     It returns records when the response body is empty meaning that no policies are enabled, i.e. Never.
     The Splunk query below returns only the latest policy modification record.
     If MFA is set to Never, this query returns one record.
     If MFA is set in Always or Use Adaptive MFA, no record is returned.
-    The Splunk query displays the modifying IP and user.
+    The Splunk query displays the modifying IP, user, and MFA policy enabled (Always, Adaptive, or Never).
+    Finally, this query can be used for reporting purposes (when and what MFA policies were enabled) by commenting
+    the "sort", "head", and "when" clauses.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type="sapi" data.description="Update multi-factor authentication policies"
+    data.type=sapi data.description="Update multi-factor authentication policies"
+    | fields data.details.response.body{}, data.details.request.ip, data.user_id
+    | rename data.details.response.body{} as mfa_mode
     ```Take only the last change of configurations that reflects the current settings```
     | sort - _time
     | head 1
     ```Check if mfa_mode contains an empty value, i.e. no policies are enabled```
-    | rename data.details.response.body{} as mfa_mode
     | where NOT match(mfa_mode, "^(all-applications|confidence-score)$")
-    |table _time, data.details.request.ip, data.user_id, data.details.request.body{}
+    | eval mfa_policy = case(
+       mfa_mode ="all-applications", "Always",
+       mfa_mode ="confidence-score", "Adaptive MFA",
+       true(), "Never"
+      )
+    | table _time, data.details.request.ip, data.user_id, mfa_policy
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - A possible false positive is when MFA policies are applied through Actions.

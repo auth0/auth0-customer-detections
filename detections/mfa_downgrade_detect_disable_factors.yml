@@ -5,7 +5,7 @@ description: |
     An adversary can try to downgrade authentication requirements by disabling strong authenticators (Webauthn) for users.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-21
 logsource:
     product: auth0
     service: mfa
@@ -18,19 +18,28 @@ detection:
 explanation: >
     The query filters for log entries recording changes in availability of MFA factors for the whole tenant.
     The Splunk query below also parses the path where the last part shows the type of the disabled factor.
-    The alert is triggered when a monitored type, e.g. phishing-resistant, of a factor is observed.
-    The Splunk query summarises the user created modification and its IP and lists disabled factors.
+    It takes the last modifications of the availability for each factor by default.
+    This query can be used for reporting purposes (when and what factors was disabled and enabled) by commenting the "sort" and "dedup" clauses.
+    Finally, the query summarises the user created modification, IP and lists disabled factors.
+    To monitor only a specific factor, e.g. phishing-resistant, uncomment the "search" clause.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type="sapi" data.description="Update multi-factor authentication type"
-    data.details.request.body.enabled=false
+    data.type=sapi data.description="Update multi-factor authentication type"
+    ```data.details.request.body.enabled=false```
+    | fields data.details.request.path, data.user_id, data.details.request.ip,
+    data.details.request.body.enabled
     ``` Excluding trusted IPs```
     ``` NOT data.details.request.ip IN ("{white-listed-IPs}")```
     | rex field=data.details.request.path "/(?<factor>[^/]+)$"
+    ```Take only the last change of configurations that reflects the current settings```
+    | sort -_time, factor
+    | dedup factor
     ```Limit monitored factors, e.g. phishing-resistant ```
-    | search factor IN (webauthn-roaming, webauthn-biometrics)
+    ```| search factor IN (webauthn-roaming, webauthn-roaming)```
+    ``` Alert when monitored factors have been disabled ```
+    | where 'data.details.request.body.enabled' = "false"
     ```Display the information in a table```
-    |table data.user_id, data.details.request.ip, factor
+    | table _time, data.user_id, data.details.request.ip, factor, data.details.request.body.enabled
 comments:
     - The Splunk query above, shall be tuned to reflect a valid tenant name.
     - Additionally, you can expand the detection to other factors, e.g. SMS.
