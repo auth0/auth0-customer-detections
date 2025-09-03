@@ -16,7 +16,7 @@ detection:
     condition: selection
 explanation: >
     The detection is tracking Guardian app enrollment identifiers across users.
-    It alerts when more than 1 user has been registered with the same Guardian App - adjust.
+    The Splunk query when more than 1 user has been registered with the same Guardian App - adjust.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=gd_enrollment_complete data.description="Guardian - Enrollment complete"
