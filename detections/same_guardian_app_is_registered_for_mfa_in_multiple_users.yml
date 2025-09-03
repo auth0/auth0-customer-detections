@@ -5,7 +5,7 @@ description: |
     An adversary may register their own MFA devices, often leveraging the same device for multiple compromised accounts to maintain persistence.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: mfa
@@ -19,7 +19,8 @@ explanation: >
     It alerts when more than 1 user has been registered with the same Guardian App - adjust.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.description="Guardian - Enrollment complete" data.type="gd_enrollment_complete"
+    data.type=gd_enrollment_complete data.description="Guardian - Enrollment complete"
+    | fields data.user_id, data.ip, data.details.enrollment.identifier
     | stats dc(data.user_id) as users_count values(data.ip) by data.details.enrollment.identifier
     | where users_count > 1
 comments:

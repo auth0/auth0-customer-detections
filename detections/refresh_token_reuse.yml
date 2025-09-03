@@ -23,7 +23,7 @@ explanation: >
     It displays affected users.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type="ferrt"
+    data.type=ferrt
     data.description="Unsuccessful Refresh Token exchange, reused refresh token detected"
     | stats count as detected_reuse_counter by data.user_id
     | where detected_reuse_counter > {excessive_reuse_threshold}

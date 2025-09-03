@@ -5,7 +5,7 @@ description: |
     Excessive permissions can lead to unauthorized access. Auth0 Management API scopes should be given to trusted applications and monitored.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-01
 logsource:
     product: auth0
     service: management_api
@@ -30,6 +30,7 @@ detection:
 explanation: >
     The query collects log entries issued when applications' settings are modified, i.e. "Update client grant".
     It filters by audience to locate Management API related activities.
+    The Splunk query provides modifying IPs, client_ids of applications which were assigned to risky scopes, and a list of these scopes.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description="Update client grant"
@@ -38,6 +39,9 @@ splunk: |
     data.details.request.body.scope{} IN ("{mgg-api-scope-1}", "{mgg-api-scope-2}")
     ```Trigger an alert when scopes are granted to applications that are not on the list of allowed clients.```
     NOT data.details.response.body.client_id IN ({trusted-client_id-1}, {trusted-client_id-2})
+    | fields _time, data.ip, data.details.request.body.scope{}, data.details.response.body.client_id
+    ```Display the information in a table```
+    | table _time, data.ip, data.details.response.body.client_id, data.details.request.body.scope{}
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name, audience, monitored Management API scopes, and trusted client_ids.
     - To reduce a number of alerts, the query can be adjusted to watch for a more critical set of scopes, e.g. focus on "delete:*", but not "read:*",

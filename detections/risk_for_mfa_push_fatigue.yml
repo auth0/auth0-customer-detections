@@ -6,7 +6,7 @@ description: |
     There is a chance that the victim will accept an MFA prompt to stop irritation.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: mfa
@@ -17,11 +17,13 @@ detection:
     condition: selection
 explanation: >
     The query below filters events capturing sending push notifications.
-    The Splunk query looks up additinal statistics, i.e. time window, number of pushes per notification. The alert is created when selected thresholds have been exceeded.
+    The Splunk query looks up additinal statistics, i.e. time window, number of pushes per notification.
+    The alert is created when selected thresholds have been exceeded.
     It displays the IPs, number of affected users, and time window.
 splunk: >
     index=auth0 data.tenant_name="{your_tenant_name}"
-    data.type="gd_send_pn"
+    data.type=gd_send_pn
+    | fields data.user_id, data.ip
     | stats min(_time) as window_start_time, max(_time) as window_end_time, count as count_pushes_per_user by data.user_id
     ```| stats max(count_pushes_per_user) as max_count```
     | eval window_duration_seconds = window_end_time - window_start_time

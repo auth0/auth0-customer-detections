@@ -8,7 +8,7 @@ description: |
     Bypassing of a custom domain can lead to circumventing of such protections as WAF, IP filters, and advanced logging.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: oidc_oauth2
@@ -35,17 +35,19 @@ splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type IN ("s", "f", "fs", "ss", "w", "fp", "scoa", "fcoa", "sepft", "fepft")
     data.hostname="{your-tenant-url}"
+    | fields data.client_id, data.client_name, data.log_id
     | table _time, data.client_id, data.client_name, data.log_id
 comments:
-    - The Splunk query above shall be tuned to reflect a valid tenant_name.
+    - The Splunk query above shall be tuned to reflect a valid tenant name and tenant url.
 tenant_logs: |
     type: (s f fs ss f u fp scoa fcoa sepft fepft) AND hostname: {your-tenant-url}
 prevention:
     - When any sort of a reverse proxy (e.g. WAF) is used in front of the tenant and IPs of this proxy can be listed,
       Auth0 Network ACL (Access Control List) can be applied to block any entries from unrecognized IPs.
 falsepositives:
-    - Legitimate use of the Auth0 tenant name URL, e.g. during testing or misconfiguration.
-level: low
+    - Legitimate use of the Auth0 tenant name URL, e.g. during testing or white-listed applications.
+    - Misconfiguration of applications that are using the Auth0 tenant name URL instead of a custom domain.
+level: medium
 tags:
     - attack.defense-evasion
     - attack.t1562
