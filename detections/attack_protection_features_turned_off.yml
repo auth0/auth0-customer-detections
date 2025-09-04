@@ -6,7 +6,7 @@ description: |
     This detection covers Suspicious IP Throttling, Breached Password Detection, and Brute-force protection.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-01
 logsource:
     product: auth0
     service: attack_protection
@@ -26,7 +26,6 @@ explanation: >
     The query collects the events indicating modification of settings for the three listed features.
     When the response body contains 'enabled' set to 'false', this indicates that a corresponding feature has been turned off.
     The Splunk query below lists the attack protection features that has been turned off.
-    By removing the "where" clause, the query can be used to report the current status of all three features.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description IN ("Update Suspicious IP Throttling settings",
@@ -50,6 +49,8 @@ splunk: |
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Adjust the detection to monitor the attack feature in use.
+    - Additionally, you can use this detection for reporting of all changes of the breached password
+     detection settings by removing the "where", "sort", and "dedubp" clauses.
 tenant_logs: |
     type: "sapi" AND (description: "Update Suspicious IP Throttling settings"
     OR description: "Update Breached Password Detection settings"

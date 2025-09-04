@@ -16,13 +16,14 @@ detection:
     condition: selection
 explanation: >
     The query collects events issued when a sms is sent.
-    The Splunk detection is based on the number of SMS sent to a single user in a given period of time.
+    The Splunk detection is based on the number of SMS sent to a single user in a given chunk of time (1h by default).
     If a number of SMS sent to a user exceeds a threshold, it is likely that the user is bombarded with SMS messages.
-    The threshold can be adjusted based on the customer's environment and the expected number of SMS messages sent to a user.
+    The threshold should be adjusted based on the customer's environment and the expected number of SMS messages sent to a user.
     The query prints the affected users.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.description="Guardian - Second factor sms sent"
+    data.type = gd_send_sms data.description="Guardian - Second factor sms sent"
+    | fields data.user_id
     ```The period of observations - adjust```
     | bin _time span=1h
     | stats count as sms_per_user by data.user_id

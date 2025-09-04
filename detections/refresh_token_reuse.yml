@@ -7,7 +7,7 @@ description: |
     This detection requires that the token rotation is enabled for an application.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: oidc_oauth2
@@ -23,8 +23,9 @@ explanation: >
     It displays affected users.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type="ferrt"
+    data.type=ferrt
     data.description="Unsuccessful Refresh Token exchange, reused refresh token detected"
+    | fields data.user_id
     | stats count as detected_reuse_counter by data.user_id
     | where detected_reuse_counter > {excessive_reuse_threshold}
     | eventstats dc(data.user_id) as affected_users_total_count
@@ -40,7 +41,7 @@ tenant_logs: |
 prevention:
     - Ensure that the application uses refresh tokens correctly to exclude misconfiguration as a cause of the reuse.
     - When tokens are requested by a frontend application, i.e. SPA, ensure that the application is not vulnerable to XSS that leads to token theft.
-    - Terminate sessions for affected users to pause the attack, however, it might come back when the user logs in again.
+    - Terminate sessions and revoke tokens for affected users to pause the attack, however, it might come back when the user logs in again.
     - Deploy a post-login action that will compare IP/ASN of initial issuing of a refresh token and IP/ASN of the current refresh token.
       If they are different, terminate the session and revoke all refresh tokens.
 falsepositives:

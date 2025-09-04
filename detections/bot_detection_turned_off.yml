@@ -2,10 +2,11 @@ title: Bot detection - the feature is turned off completely or some policies.
 id: dc37e695-df6f-439c-82aa-fe7127c5a3c3
 status: experimental
 description: |
-    Detect when the Bot detection feature is not enforcing the protection.
+    Detect when the Bot detection feature is not enforcing protection on any of the supported flows.
+    This can allow malicious actors to conduct scripted attacks without being detected and blocked.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-01
 logsource:
     product: auth0
     service: attack_protection
@@ -30,19 +31,28 @@ explanation: >
     The Splunk query provides details about IPs, where the change was done from, and values for the listed policies.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type=sapi
+    data.type=sapi data.details.response.statusCode=200
     data.description="Create or update the anomaly detection captcha"
-    (data.details.response.body.password_reset_policy=off OR
-    data.details.response.body.passwordless_policy=off OR
-    data.details.response.body.policy=off)
-    data.details.response.statusCode=200
-    ```Display the information in a table```
-    |table data.ip, data.details.response.body.policy, data.details.response.body.password_reset_policy,
-    data.details.response.body.passwordless_policy
-comments: >
+    | fields data.ip, data.details.response.body.policy, data.details.response.body.passwordless_policy,
+    data.details.response.body.password_reset_policy
+    ```Take only the last change of configurations that reflects the current settings```
+    | sort -_time
+    | head 1
+    | rename data.details.response.body.policy as pwd_login_signup
+    | rename data.details.response.body.passwordless_policy as pwdless_login_signup
+    | rename data.details.response.body.password_reset_policy as password_reset
+    | fields _time, data.ip, pwd_login_signup, pwdless_login_signup, password_reset
+    ``` Capturing only events where bot detection features have been turned off```
+    | where ('pwd_login_signup'="off" OR 'pwdless_login_signup'="off" OR 'password_reset'="off")
+    ```Display the information```
+    | stats by _time, data.ip, pwd_login_signup, pwdless_login_signup, password_reset
+comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
-    - A possible extension of this detection is to monitor if CAPTCHA changes from, e.g. Auth Challenge, to a simple one.
+    - A possible extension of this detection is to monitor if CAPTCHA changes from, e.g. Auth Challenge,
+      to a simple one degradating the strength of protection.
+    - Additionally, you can use this detection for reporting of all changes of the bot detection
+      settings by removing the "where" and "head" clauses.
 tenant_logs: |
     type:"sapi" AND description: "Create or update the anomaly detection captcha"
 prevention:

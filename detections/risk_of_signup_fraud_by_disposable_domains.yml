@@ -5,7 +5,7 @@ description: |
     Detect potential signup fraud by monitoring the use of disposable emails.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-18
+modified: 2025-09-02
 logsource:
     product: auth0
     service: signup
@@ -25,10 +25,13 @@ detection:
             - "@mohmal.com"
     condition: selection
 explanation: >
-    The query monitors successful signups events within a selected time window and validates if a disposable email has been used.
-    It alerts when the number of users with disposable emails exceeds a threshold.
+    The query monitors successful signups events when a disposable email has been used.
+    The Splunk query considers a number of signups within specified time chunks (e.g. 1h)
+    and alerts when the number of users with disposable emails exceeds a threshold.
 splunk: |
-    index=auth0 data.type = "ss"
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type = ss
+    | fields data.user_name, data.user_id, data.type
     | bin _time span=1h
     | search data.user_name IN ("*@mailinator.com", "*@yopmail.com", "*@10minutemail.com",
     "*@guerrillamail.com", "*@temp-mail.org", "*@disposable.com", "*@mailnesia.com",
@@ -39,7 +42,8 @@ splunk: |
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - The value for thresholds_disposable_emails should be set based on the customer's environment and expected behavior.
-    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate the thresholds based on the observed data.
+    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time
+      and calculate the thresholds based on the observed data.
     - The query can be adjusted to account for a longer public blocklist, e.g. available on github, using a lookup table.
 tenant_logs: |
     type:"fs" OR type:"ss" OR type:"signup_pwd_leak"

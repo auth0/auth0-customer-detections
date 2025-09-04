@@ -6,7 +6,7 @@ description: |
     An adversary may try to harvest authorization codes for exchanging them for tokens later, or simply conducting a denial-of-service attack by depleting the rate limit.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-01
 logsource:
     product: auth0
     service: oidc_oauth2
@@ -19,28 +19,33 @@ detection:
             - 'Unknown client'
             - 'Unsupported response type'
             - 'Service not found'
+            - 'The redirect_uri parameter is not valid'
     condition: selection
 explanation: >
-    The query collects the failed login request entries.
-    It monitors statistics for an unregistered redirect URI, unrecognized audience or client, unsupported response type or challenge type.
+    The query collects the failed login request entries and monitors parameters of the authorization request that can be abused.
+    These are unregistered or invalid redirect URI, unrecognized audience or client, unsupported response type or challenge type.
     The Splunk query below also provides the malformed values and counts a number of entries for each category.
     It alerts when the count for any of the categories exceeds a specified threshold.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type = "f"
-    data.description IN ("*is not supported by this server*", "*mismatch*", "*Unknown client*", "*Unsupported response type*", "*Service not found*")
-    | rex "Callback URL mismatch\. (?<malformed_uri>.+?) is not in the list of allowed callback URLs"
-    | rex "Code challenge type (?<malformed_challenge_type>.+?) is not supported by this server."
-    | rex "\"Unknown client: (?<malformed_client>[^\"]*)\""
-    | rex "\"Unsupported response type: (?<malformed_response_type>[^\"]*)\""
-    | rex "\"Service not found: (?<malformed_audience>[^\"]*)\""
-    | stats values(malformed_uri) as malformed_uri, values(malformed_challenge_type) as malformed_challenge_type, values(malformed_client) as malformed_client,
-      values(malformed_response_type) as malformed_response_type, values(malformed_audience) as malformed_audience
+    data.type = f
+    data.description IN ("*is not supported by this server*", "*mismatch*", "*Unknown client*", "*Unsupported response type*", "*Service not found*", "The redirect_uri parameter is not valid*")
+    | fields data.description
+    ```Collect injection strings```
+    | rex field=data.description "Callback URL mismatch\. (?<mismatch_uri>[^ ]+)"
+    | rex field=data.description "Code challenge type (?<malformed_challenge_type>[^ ]+) is not supported by this server\."
+    | rex field=data.description "Unknown client: (?<malformed_client>.*)"
+    | rex field=data.description "Unsupported response type: (?<malformed_response_type>.*)"
+    | rex field=data.description "Service not found: (?<malformed_audience>.*)"
+    | rex field=data.description "The redirect_uri parameter is not valid: \"(?<malformed_redirect>[^\"]*)\""
+    ```Prepare output: list injected strings and calculate volumes for each parameter of the authorization request```
+    | stats values(mismatch_uri) as mismatch_uri, values(malformed_challenge_type) as malformed_challenge_type, values(malformed_client) as malformed_client,
+      values(malformed_response_type) as malformed_response_type, values(malformed_audience) as malformed_audience, values(malformed_redirect) as malformed_redirect
     | transpose
-    | rename "column" as Field, "row 1" as Value
-    | eval Count=mvcount(Value)
-    | table Field, Value, Count
-    | where Count > {threshold}
+    | rename "column" as field, "row 1" as value
+    | eval count=mvcount(value)
+    | table field, value, count
+    | where count > {threshold}
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - The values for threshold should be set based on the customer's environment and expected behavior

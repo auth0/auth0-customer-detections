@@ -2,11 +2,12 @@ title: Suspicious IP Throttling - critical settings manipulated
 id: afb609fe-716f-11f0-b060-723487b9527c
 status: experimental
 description: |
-    A threat actor can manipulate the critical settings of Suspicious IP Throttling, such as disabling the feature or setting it to a monitoring mode where no blocking occurs.
+    A threat actor can manipulate the critical settings of Suspicious IP Throttling, such as disabling
+    the feature or setting it to a monitoring mode where no blocking occurs.
     This can allow malicious IPs to bypass protections and continue attacks without being blocked.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: attack_protection
@@ -22,26 +23,35 @@ detection:
     condition: selection or filter
 explanation: >
     The query filters for an event indicating a change of Suspicious IP Throttling settings.
-    The splunk query below alerts when the feature is completely disabled or set into a monitoring mode,
+    The Splunk query below alerts when the feature is completely disabled or set into a monitoring mode,
     i.e. no blocking of IP is enabled or/and notifications to admin are turned off.
     It displays the modifying IP, the enabled mode, and that staus of admin notifications.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type="sapi" data.description="Update Suspicious IP Throttling settings"
+    data.type=sapi data.description="Update Suspicious IP Throttling settings"
+    | fields data.details.response.body.shields{}, data.details.response.body.enabled, data.ip
+    ```Take only the last change of configurations that reflects the current settings```
+    | sort - _time
+    | head 1
     | rename data.details.response.body.shields{} as shields
     | rename data.details.response.body.enabled as susp_ip_throttling_enabled
     | eval susp_ip_throttling_blocking = if(isnotnull(mvfind(shields, "block")), "true", "false")
     | eval susp_ip_throttling_admin_notifications = if(isnotnull(mvfind(shields, "admin_notification")), "true", "false")
+    ```Alert when suspicious IP throttling is completely disabled or its blocking responses```
     | where susp_ip_throttling_enabled = "false" OR
             (susp_ip_throttling_enabled = "true" AND
             (susp_ip_throttling_blocking="false" OR
             susp_ip_throttling_admin_notifications="false"))
         ```Display the information in a table```
-    | table data.ip, shields, susp_ip_throttling_enabled, susp_ip_throttling_blocking, susp_ip_throttling_admin_notifications
+    | table _time, data.ip, shields, susp_ip_throttling_enabled, susp_ip_throttling_blocking,
+    susp_ip_throttling_admin_notifications
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Limit the detection to actions conducted from not white-listed IPs and/or particular users.
-    - Adjust the "where" clauses when needed, i.e. if admin notifications are supposed to be disabled and not triggering an alert (susp_ip_throttling_admin_notifications).
+    - Adjust the "where" clauses when needed, i.e. if admin notifications are supposed to be disabled
+      and not triggering an alert (susp_ip_throttling_admin_notifications).
+    - This detection can be used for reporting of all changes of the suspicsiou IP throttling settings
+      by removing the "where" and "head" clauses.
 tenant_logs: |
     type: "sapi" AND description: "Update Suspicious IP Throttling settings"
 prevention:
@@ -51,7 +61,7 @@ prevention:
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
 falsepositives:
     - When custom domain has not been configured, all authentication happends through the canonical domain.
-level: low
+level: medium
 tags:
     - attack.defense-evasion
     - attack.t1562

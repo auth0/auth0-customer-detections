@@ -7,7 +7,7 @@ description: |
     phishing (consent phishing) by creating look-alike applications, and causing admin fatigue by overwhelming the admin with clients.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-02
 logsource:
     product: auth0
     service: oidc_oauth2
@@ -19,10 +19,11 @@ detection:
 explanation: >
     The query collects log entries captured when a client is created using dynamic client registration.
     The Splunk detection below observes the number of clients created within a specified time window.
-    It alerts if an excessive number of clients, denoted by threshold_for_max_clients_created) have been created within a specified time window.
+    It alerts if an excessive number of clients, denoted by threshold_for_max_clients_created, have been created within a specified time window.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description="Dynamic client registration"
+    | fields data.details.response.body.client_id
     | eval original_time = _time
     ```Adapt the time span to your needs, e.g. 10 min, 1 hour, 1 day, etc.```
     | bin _time span=1h
