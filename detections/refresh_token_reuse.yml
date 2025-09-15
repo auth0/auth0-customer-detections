@@ -44,6 +44,8 @@ prevention:
     - Terminate sessions and revoke tokens for affected users to pause the attack, however, it might come back when the user logs in again.
     - Deploy a post-login action that will compare IP/ASN of initial issuing of a refresh token and IP/ASN of the current refresh token.
       If they are different, terminate the session and revoke all refresh tokens.
+    - Consider to add additional layers to protect access tokens - sender-constrained tokens (DPoP or mTLS) to address the possesion issue,
+      back-channel logout to be able to revoke tokens, externalized authorization, e.g. with FGA, to avoid relying on permissions written in access tokens.
 falsepositives:
     - Misconfigured applications that are caching refresh tokens.
 level: medium
