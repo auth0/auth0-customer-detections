@@ -13,7 +13,8 @@ rules:
         require-starting-space: true
         min-spaces-from-content: 1
     comments-indentation: disable
-    document-start: {present: false}
+    #document-start: {present: false}
+    document-start: disable
     empty-lines: {max: 2, max-start: 2, max-end: 2}
     indentation: {spaces: 4, indent-sequences: whatever}
     line-length: disable
