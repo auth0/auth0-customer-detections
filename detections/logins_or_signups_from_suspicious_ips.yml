@@ -1,0 +1,90 @@
+title: Successful Logins and Signups from Flagged IPs
+name: selected_events
+id: a9d48080-5b88-4e4d-8b6d-45696f85c444
+status: experimental
+description: |
+    Detects when successful login and signup events are observed from IP addresses that have also been flagged
+    by a tenant's attack protection features.
+    The correlation of these suspicious IPs with successful login and signup events can indicate a compromised account
+    or a successful credential-based attack (e.g., credential stuffing).
+    This detection includes events from Suspicious IP Throttling, Breached Password Detection, Brute-force protection, and Bot Detection.
+author: Okta
+date: 2025-09-13
+modified: 2025-09-13
+logsource:
+    product: auth0
+    service: attack_protection
+detection:
+    selection_attack_protection:
+        data.type:
+            # - reset_pwd_leak # breach password protection
+            # - pwd_leak # breach password protection
+            # - signup_pwd_leak # breach password protection
+            # - limit_wc # brute force protection
+            # - limit_sul # suspicious IP throttling
+            # - limit_mu # suspicious IP throttling
+    selection_bot_detection:
+        data.type:
+            - pla # bot detection
+        data.details.requiresVerification:
+            - true
+    selection_success_auth:
+        data.type:
+            - s
+            # - ss
+    group-by:
+        - data.ip
+    condition: selection_attack_protection or selection_bot_detection or selection_success_auth
+explanation: >
+    This detection collects IP addresses associated with behaviors that have been flagged by attack protection features.
+    These IPs are correlated with successful login and signups events giving a list of potentially compromised user accounts.
+    The Splunk query below consumes all events from attack protection features and compares to both successful login and signup.
+    The Sigma detection has a more narrow scope.
+    It uses a correlated rule, which is configured in two parts (base and correlation, see https://sigmahq.io/docs/meta/correlations.html).
+    Due to limitations in Sigma syntax, a meaningful search result (a list of IPs with both suspicious and successful events)
+    can only be obtained by correlating a pair of one attack protection event (i.e. reset_pwd_leak or pwd_leak or signup_pwd_leak
+    or limit_wc or limit_sul or limit_mu or pla) and one authentication event (i.e. 's' or 'ss').
+    To refine the search, uncomment/comment the specific events you wish to monitor/exclude.
+    For example, you can search those successful logins (i.e. s event) observed from IPs flagged by the bot detection (i.e. pla event).
+    Alternatively, you can create separate, dedicated detections for each pair of attack protection and authentication events.
+    This will give you 14 separate detection rules to cover all possible combinations.
+splunk: |
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type IN (reset_pwd_leak pwd_leak signup_pwd_leak limit_wc limit_sul limit_mu ss s)
+    OR (data.type=pla AND data.details.requiresVerification=true)
+    ``` Group all events by IPs ```
+    | stats values(data.type) as event_types, values(data.user_id) as user_ids
+     values(data.user_name) as user_names by data.ip
+     ``` Filter those IPs with presence of attack protection and successful authentication events ```
+    | where (match(event_types, "reset_pwd_leak") OR match(event_types, "pwd_leak") OR match(event_types, "signup_pwd_leak")
+     OR match(event_types, "limit_wc") OR match(event_types, "limit_sul") OR match(event_types, "limit_mu")
+     OR match(event_types, "pla")) AND (match(event_types, "ss") OR match(event_types, "s"))
+    | table data.ip, event_types, user_ids, user_names
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - Adjust the detection to monitor the attack feature in use by your environment.
+tenant_logs: |
+    type: (reset_pwd_leak pwd_leak signup_pwd_leak limit_wc limit_sul limit_mu pla))
+prevention:
+    - Enforcing strong MFA authenticators such as phishing-resistance with FIDO2 WebAuthn.
+    - Enable passkey authentication to protect your users from password-based attacks like credentials stuffing
+    - Introduce additional defense layers, such as third-party bot detection services, combining the customer domain and Tenant ACL features.
+falsepositives:
+    - This rule is designed for threat hunting and to be a starting point for further investigation.
+    - The hunting window is too wide and an adversary has already moved on to other IPs and the indicated IPs belong to a legit user since then.
+level: medium
+tags:
+    - attack.credential_access
+    - attack.initial_access
+---
+title: Successful logins from suspicious IPs
+correlation:
+    type: value_count
+    rules:
+        - selected_events # Referenced here
+    group-by:
+        - data.ip
+    timespan: 5d
+    condition:
+        gte: 2
+        field: data.type
