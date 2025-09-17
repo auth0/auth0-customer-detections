@@ -1,0 +1,85 @@
+title: Creation of large amount of unverified accounts
+id: 6ef35d2c-ae8f-4b42-91b8-67915c7e41ff
+name: selected_events
+status: experimental
+description: |
+    Detect rapid creation of large amounts of unverified accounts, which may be a precursor to fraudulent activity or account exploitation.
+    Unverified accounts can be created by attackers or automated bots attempting to test the system or conduct fraudulent activities.
+author: Okta
+date: 2025-09-16
+modified: 2025-09-16
+logsource:
+    product: auth0
+    service: singup
+references:
+    - https://blog.castle.io/fraudulent-email-domain-tracker-july-2025/
+detection:
+    selection:
+        data.type:
+            - ss # successful signup
+            - sv # email verification
+    collect_email_domains:
+        data.user_name|re: ".+@(.+)"
+    condition: selection and collect_email_domains
+explanation: >
+    This detection collects two events: a successful user signup ('ss') and a successful email verification ('sv').
+    It identifies users who have signed up but have not completed the email verification process within a specified time
+    window, which is an indicator of suspicious activity by creating puppet accounts.
+    The Sigma detection uses a correlated rule, which is configured in two parts: base and correlation,
+    see https://sigmahq.io/docs/meta/correlations.html.
+    The Splunk query also provides options to monitor a number of unverified users and used domains.
+splunk: |
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type IN (ss sv)
+    | fields data.user_name, data.type, data.user_id
+    ``` Calculations ```
+    | eval elapsed_time = (now() - _time) / 60
+    | rex field=data.user_name ".+@(?<user_domain>.*)"
+    | stats values(data.type) as event_types, count(data.type) as cnt_events_per_user, min(elapsed_time) as
+     min_elapsed_time by data.user_name data.user_id user_domain
+    ``` Filtering for users who has not completed email verification within a specified time window,
+    i.e. we see just one event (ss) ```
+    | where cnt_events_per_user = 1 and min_elapsed_time > {threshold_not_verified_within_X_min}
+    ``` Display information about unverified users```
+    | table data.user_id, data.user_name, user_domain, event_types, min_elapsed_time
+    ``` Option 1 - Alert when a number of created unverified users exceeds a threshold```
+    ```| stats count(data.user_id) as unverified_user_cnt
+    | where unverified_user_cnt > {threshold_indicating_surge_of_unverified_users} ```
+    ``` Option 2 - Extend the detection to monitor high-volume unvalidated domains ```
+    ```| stats count as cnt_domain by user_domain`
+    | where cnt_domain > {threshold_indicating_surge_of_email_domains} ```
+comments:
+    - The Splunk query requires a valid tenant name and a threshold to be defined for the unverified time window
+     (threshold_not_verified_within_X_min)
+    - This Splunk query can be modified in two ways by simply uncommenting respective clauses.
+      Option 1 - allows to alert when a surge in unverified users has been observed, i.e. threshold_indicating_surge_of_unverified_users.
+      Option 2 - allows to alert when a surge in email domains has been observed, i.e. threshold_indicating_surge_of_email_domains.
+    - To establish baselines, it is recommended to run the query over a period of time to calculate normal thresholds based on observed data.
+tenant_logs: |
+    type: (ss sv)
+prevention:
+    - Enforce Email OTP verification during signup instead of relying on a post-signup email link.
+    - Deny access to unverified accounts to reduce the risk of abuse with post-login actions.
+    - Delete or block unverified accounts. Alternatively, introduce higher friction by
+      assessing risk signals and forcing Adaptive MFA via post-login actions.
+    - Enable attack protection features, e.g. suspicious IP throttling, to detect and block suspicious activities.
+falsepositives:
+    - This rule is designed for threat hunting and serves as a starting point for further investigation.
+    - Legitimate users may not verify their email immediately after signup, leading to false positives.
+level: medium
+tags:
+    - attack.credential_access
+    - attack.reconnaissance
+---
+title: Creation of many unverified accounts
+correlation:
+    type: value_count
+    rules:
+        - selected_events # Referenced here
+    group-by:
+        - data.user_name
+        - data.user_id
+    timespan: 30d
+    condition:
+        lte: 1
+        field: data.type
