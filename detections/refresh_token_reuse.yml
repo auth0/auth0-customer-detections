@@ -50,6 +50,7 @@ prevention:
       back-channel logout to be able to revoke tokens, externalized authorization, e.g. with FGA, to avoid relying on permissions written in access tokens.
 falsepositives:
     - Misconfigured applications that are caching refresh tokens.
+    - Configured rotation overlap period is not adequate for application needs.
 level: medium
 tags:
     - attack.credential-access
