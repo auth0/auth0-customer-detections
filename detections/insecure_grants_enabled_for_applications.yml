@@ -51,8 +51,9 @@ prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Control Management API scopes that allow modification of attack protection features - update:clients.
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
-    - If you have an edge case where the implicit flow is necessary, consider the form_post response mode and/or
-      request access token in a combination with an id token.
+    - If you have an edge case where the implicit flow is necessary, use a better version of it - request a token via the form_post
+      response mode; request only ID token in combination with a code (Hybrid); request access token in a combination with an ID token
+      protected from reply attacks by nonce for matching the at_hash attribute.
     - Default to the Authorization Code grant with PKCE even for regular web applications enforcing PKCE with a post-login action.
 falsepositives:
     - Legitimate updates by an administrator. This rule is designed for threat hunting and to be a starting point for further investigation.
