@@ -10,7 +10,7 @@ description: |
     This detection includes events from Suspicious IP Throttling, Breached Password Detection, Brute-force protection, and Bot Detection.
 author: Okta
 date: 2025-09-13
-modified: 2025-09-13
+modified: 2025-09-17
 logsource:
     product: auth0
     service: attack_protection
@@ -32,8 +32,6 @@ detection:
         data.type:
             - s
             # - ss
-    group-by:
-        - data.ip
     condition: selection_attack_protection or selection_bot_detection or selection_success_auth
 explanation: >
     This detection collects IP addresses associated with behaviors that have been flagged by attack protection features.
@@ -52,6 +50,7 @@ splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type IN (reset_pwd_leak pwd_leak signup_pwd_leak limit_wc limit_sul limit_mu ss s)
     OR (data.type=pla AND data.details.requiresVerification=true)
+    | fields data.type data.user_id, data.ip, data.user_name
     ``` Group all events by IPs ```
     | stats values(data.type) as event_types, values(data.user_id) as user_ids
      values(data.user_name) as user_names by data.ip
@@ -64,7 +63,7 @@ comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
     - Adjust the detection to monitor the attack feature in use by your environment.
 tenant_logs: |
-    type: (reset_pwd_leak pwd_leak signup_pwd_leak limit_wc limit_sul limit_mu pla))
+    type: (reset_pwd_leak pwd_leak signup_pwd_leak limit_wc limit_sul limit_mu pla)
 prevention:
     - Enforcing strong MFA authenticators such as phishing-resistance with FIDO2 WebAuthn.
     - Enable passkey authentication to protect your users from password-based attacks like credentials stuffing
