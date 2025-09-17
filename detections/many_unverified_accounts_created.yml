@@ -7,12 +7,10 @@ description: |
     Unverified accounts can be created by attackers or automated bots attempting to test the system or conduct fraudulent activities.
 author: Okta
 date: 2025-09-16
-modified: 2025-09-16
+modified: 2025-09-17
 logsource:
     product: auth0
     service: singup
-references:
-    - https://blog.castle.io/fraudulent-email-domain-tracker-july-2025/
 detection:
     selection:
         data.type:
@@ -60,8 +58,8 @@ tenant_logs: |
 prevention:
     - Enforce Email OTP verification during signup instead of relying on a post-signup email link.
     - Deny access to unverified accounts to reduce the risk of abuse with post-login actions.
-    - Delete or block unverified accounts. Alternatively, introduce higher friction by
-      assessing risk signals and forcing Adaptive MFA via post-login actions.
+    - Delete or block unverified accounts with with automation (e.g. batch job or Okta workflows).
+    - Alternatively, introduce higher friction by assessing risk signals and forcing Adaptive MFA via post-login actions.
     - Enable attack protection features, e.g. suspicious IP throttling, to detect and block suspicious activities.
 falsepositives:
     - This rule is designed for threat hunting and serves as a starting point for further investigation.
