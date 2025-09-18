@@ -6,7 +6,7 @@ description: |
     According to the recent update OAuth2.1 and RFC 9700, these flows shall be avoided.
 author: Okta
 date: 2025-07-11
-modified: 2025-08-04
+modified: 2025-09-17
 logsource:
     product: auth0
     service: oidc_oauth2
@@ -51,7 +51,9 @@ prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Control Management API scopes that allow modification of attack protection features - update:clients.
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
-    - If you have an edge case where the implicit flow is necessary, consider the form_post response mode and/or request access token in a combination with an id token.
+    - If you have an edge case where the implicit flow is necessary, use a better version of it - request a token via the form_post
+      response mode; request only ID token in combination with a code (Hybrid); request access token in a combination with an ID token
+      protected from reply attacks by nonce for matching the at_hash attribute.
     - Default to the Authorization Code grant with PKCE even for regular web applications enforcing PKCE with a post-login action.
 falsepositives:
     - Legitimate updates by an administrator. This rule is designed for threat hunting and to be a starting point for further investigation.

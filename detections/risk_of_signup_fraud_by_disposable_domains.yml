@@ -5,10 +5,12 @@ description: |
     Detect potential signup fraud by monitoring the use of disposable emails.
 author: Okta
 date: 2025-07-11
-modified: 2025-09-02
+modified: 2025-09-17
 logsource:
     product: auth0
     service: signup
+references:
+    - https://blog.castle.io/fraudulent-email-domain-tracker-july-2025/
 detection:
     selection:
         data.type: "ss"
@@ -51,6 +53,8 @@ prevention:
     - Use pre-registration actions to block any registration with disposable emails.
     - Force email validation built-in feature of a Database connection on signup.
     - Block or delete the created fraudulent accounts (terminating the sessions and revoking tokens).
+    - Instead of blocking or suspending users, consider to use additional risk signals to increase assurance in
+      further activities from these users.
 falsepositives:
     - Legitimate users using disposable email addresses for privacy reasons.
 level: medium
