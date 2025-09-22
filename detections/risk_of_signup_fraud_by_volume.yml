@@ -1,53 +1,94 @@
 title: Risk of signup fraud - rapid creation of fake accounts
 id: 3a9be414-716e-11f0-8153-723487b9527c
+name: selected_events
 status: experimental
 description: |
-    Detect potential signup fraud by monitoring the following events:  surge in a number of registration, excessive failed signups,
+    Detect potential signup fraud by monitoring the following events: surge in a number of registration, excessive failed signups,
     or too many signup attempts with use of breached passwords.
 author: Okta
 date: 2025-07-11
-modified: 2025-09-02
+modified: 2025-09-19
 logsource:
     product: auth0
-    service: signup
 detection:
     selection:
         data.type:
-            - "fs"
-            - "ss"
-            - "signup_pwd_leak"
+            - fs
+            - ss
+            - signup_pwd_leak
     condition: selection
 explanation: >
     The query collects log entries with successful/failed signups as well as signup attempts where leaked credentials were attempted.
-    The Splunk query alerts when one of the thresholds exceeds - number of successful signups, failed signups, or signups attempts with breached passwords.
-    The query can be limited to, for example, only successful signups surge by commenting respective "where" clauses.
+    The Splunk query alerts when one of the thresholds exceeds - number of successful signups, failed signups,
+    or signups attempts with breached passwords.
+    The query can be limited to, for example, only successful signups surge by setting a respective threshold to 0.
+    The Splunk query provides aggregations both per an observation window (default is 1 hour) and per IPs,
+    i.e. Option 1 and Option 2 respectively.
+    Both aggregations can be applied at the same time or separately, see comments in the query itself.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type IN ("fs","ss","signup_pwd_leak")
+    data.type IN (fs, ss, signup_pwd_leak)
+    ``` Adjust the observation window if needed```
     | bin _time span=1h
-    | stats count(eval('data.type'="fs")) as count_fs,
-        count(eval('data.type'="ss")) as count_ss,
-        count(eval('data.type'="signup_pwd_leak")) as count_signup_pwd_leak
-        by _time
+    | fields data.type data.ip
+    ``` Option 1 - This part of the query below provides aggregation per an observation window ```
+    | eventstats count(eval('data.type'="fs")) as total_count_fs,
+             count(eval('data.type'="ss")) as total_count_ss,
+             count(eval('data.type'="signup_pwd_leak")) as total_count_signup_pwd_leak
+             by _time
+    ``` Adjust the thresholds. Set threshold to 0 to exclude one of the events from filtering ```
+    | where total_count_fs >= {thresholds_total_failed}
+    | where total_count_ss >= {thresholds_total_successful}
+    | where total_count_signup_pwd_leak >= {thresholds_total_leaked_pwd}
+    ``` Uncomment two clauses below (dedup and table) and comment the rest of the query
+       to see total count of events per observation window, not IPs ```
+    ```| dedup _time
+    | table _time, total_count_fs, total_count_ss, total_count_signup_pwd_leak```
+    ``` Option 2 - This part of the query below provides aggregation per IP ```
+    | stats count(eval('data.type'="fs")) as per_ip_count_fs,
+        count(eval('data.type'="ss")) as per_ip_count_ss,
+        count(eval('data.type'="signup_pwd_leak")) as per_ip_count_signup_pwd_leak
+        by _time, data.ip
     | fillnull value=0
-    | where count_fs >= {thresholds_failed_signups}
-    | where count_ss >= {thresholds_successful_signups}
-    | where count_signup_pwd_leak >= {thresholds_leaked_pwd}
-    | table _time, count_fs, count_ss, count_signup_pwd_leak
+    ``` Extra filtering to exclude low volume IPs```
+    | where per_ip_count_fs >= {thresholds_per_ip_failed}
+    | where per_ip_count_ss >= {thresholds_per_ip_successful}
+    | where per_ip_count_signup_pwd_leak >= {thresholds_per_ip_leaked_pwd}
+    | table _time, data.ip, per_ip_count_fs, per_ip_count_ss, per_ip_count_signup_pwd_leak
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
-    - The values for thresholds_failed_signups, thresholds_successful_signups, and thresholds_leaked_pwd should be set based on the customer's environment and expected behavior.
-    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate the thresholds based on the observed data.
+    - The following thresholds values should be set based on the customer's environment and expected behavior -
+      thresholds_total_failed, thresholds_total_successful, thresholds_total_leaked_pwd, thresholds_per_ip_failed,
+      thresholds_per_ip_successful, and thresholds_per_ip_leaked_pwd
+    - To learn normality, it is recommended to run the query (excluding "where" clauses) for a period of time and calculate
+      the thresholds based on the observed data.
     - A similar detection (with less details) can be implemented through Security Center and its alerts.
+    - An attempt to signup with leaked credentials (signup_pwd_leak) released at the same time with failed signups (fs).
+      The query does not account for it.
 tenant_logs: |
     type:"fs" OR type:"ss" OR type:"signup_pwd_leak"
 prevention:
-    - Enable Attack protection features
-    - Migrate to passwordless authentication
-    - Collect attribution of the fraudulent traffic (IPs, ASNs, Geo), and block the obviously malicious sources, e.g. with Tenant ACL.
+    - Enable attack protection features preventing velocity-based attacks, i.e. suspicious IP throttling and bot detection.
+    - Migrate to passwordless authentication that adds friction to adversaries.
+    - Collect attribution of the fraudulent traffic (IPs, ASNs, Geo, ja3/ja4), and block the obviously malicious sources with Tenant ACL.
+    - Force email OTP validation built-in feature of a Database connection on signup.
 falsepositives:
-    - Legitimate users signing up with a large number of accounts, e.g. as result of the black friday.
+    - Legitimate users signing up with a large number of accounts, e.g. as result of marketing campaigns like the black friday
+      or concentrated events like conferences.
 level: medium
 tags:
     - attack.resource-development
     - attack.t1136
+---
+title: Surge in signup events
+correlation:
+    type: event_count
+    rules:
+        - selected_events # Referenced here
+    group-by:
+        - data.ip
+        - data.type
+    timespan: 1h
+    condition:
+        gte: 1
+        field: data.type
