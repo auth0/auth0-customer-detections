@@ -10,7 +10,6 @@ date: 2025-07-11
 modified: 2025-09-02
 logsource:
     product: auth0
-    service: attack_protection
 detection:
     selection:
         data.type: sapi

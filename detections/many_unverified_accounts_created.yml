@@ -10,7 +10,6 @@ date: 2025-09-16
 modified: 2025-09-17
 logsource:
     product: auth0
-    service: singup
 detection:
     selection:
         data.type:
@@ -58,9 +57,10 @@ tenant_logs: |
 prevention:
     - Enforce Email OTP verification during signup instead of relying on a post-signup email link.
     - Deny access to unverified accounts to reduce the risk of abuse with post-login actions.
-    - Delete or block unverified accounts with with automation (e.g. batch job or Okta workflows).
+    - Delete or block unverified accounts with automation (e.g. batch job or Okta workflows).
     - Alternatively, introduce higher friction by assessing risk signals and forcing Adaptive MFA via post-login actions.
-    - Enable attack protection features, e.g. suspicious IP throttling, to detect and block suspicious activities.
+    - Enable velocity-based attack protection features, i.e. suspicious IP throttling and bot detection, to detect
+      and block suspicious activities.
 falsepositives:
     - This rule is designed for threat hunting and serves as a starting point for further investigation.
     - Legitimate users may not verify their email immediately after signup, leading to false positives.
