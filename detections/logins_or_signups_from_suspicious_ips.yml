@@ -13,7 +13,6 @@ date: 2025-09-13
 modified: 2025-09-17
 logsource:
     product: auth0
-    service: attack_protection
 detection:
     selection_attack_protection:
         data.type:

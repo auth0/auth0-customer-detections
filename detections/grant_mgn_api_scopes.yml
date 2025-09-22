@@ -8,7 +8,6 @@ date: 2025-07-11
 modified: 2025-09-01
 logsource:
     product: auth0
-    service: management_api
 detection:
     selection:
         data.type: sapi

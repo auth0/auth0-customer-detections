@@ -8,7 +8,6 @@ date: 2025-07-11
 modified: 2025-08-04
 logsource:
     product: auth0
-    service: mfa
 detection:
     selection:
         data.type: gd_send_sms
