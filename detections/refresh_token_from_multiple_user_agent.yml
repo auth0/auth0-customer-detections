@@ -1,0 +1,86 @@
+title: Refresh Token Exchange from Multiple User Agents
+id: 6a19be71-ade9-4bdd-9d24-6f93800d8328
+name: selected_events
+status: experimental
+description: |
+    Detects when a refresh token is exchanged for an access token from an **unusual volume of distinct User Agents (UAs)**.
+    The use of a single refresh token across an excessive number of UAs strongly suggests the token has been hijacked
+    and is actively being used by an attacker.
+author: Okta
+date: 2025-10-01
+modified: 2025-10-01
+logsource:
+    product: auth0
+detection:
+    selection:
+        data.type:
+            - seacft # Successful exchange of a code for access and refresh tokens
+            - sertft # Successful exchange of a refresh token for an access token
+    condition: selection
+explanation: >
+    The query collects the events where refresh token has been issued by the /token endpoint.
+    The core assumption is that a user's UA typically remains consistent over time.
+    An attacker, however, may keep swapping or spoofing UAs to evade detection mechanisms.
+    The rule alerts when the number of distinct UAs used for a refresh token exchange exceeds a predefined threshold.
+    The provided Splunk query offers two primary monitoring strategies:
+    **Option 1 (Volume Check):** Checks if the count of distinct UAs exceeds a static threshold.
+    This is suitable for Single Page Applications (SPAs) where a user might legitimately use multiple browsers or a browser
+    has been updated, though the total UA count is usually low.
+    **Option 2 (Allowed UAs Check):** Identifies exchanges originating from UAs that are **not** on an approved list.
+    This suites architectures based on Regular Web Applications (RWAs) and Native Apps where the token exchange is
+    performed by a backend service or a known application, making the expected UA highly predictable.
+splunk: |
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    | fields data.user_agent data.user_id data.user_name data.client_id data.details.familyId
+    | stats dc(data.user_agent) as ua_count values(data.user_agent) as observed_uas
+            by data.user_name data.user_id data.client_id data.details.familyId
+    ``` Option 1 - check the volume of used UA, suits SPA that can be loaded in different browsers```
+    | where ua_count > {threshold_ua_count}
+    ``` Option 2 - check for a particular allowed user agents, suits for RWA and Native Apps```
+    ```| eval total_ua_count = mvcount(uas)
+    | eval approved_ua = mvfilter(match(uas, "(?i){list_of_allowed_ua}"))
+    | eval approved_ua_count = mvcount(approved_ua)
+    | where approved_ua_count != total_ua_count```
+    ``` Print the suspicious records ```
+    | table data.user_name data.user_id data.client_id data.details.familyId ua_count observed_uas
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - The following thresholds should be set based on the customer's environment and expected behavior -
+      threshold_ua_count and list_of_allowed_ua (use the pipe "|" as a delimiter, e.g. "UA1|UA2|UA2")
+    - Option 2 is recommended for Native apps and RWAs when UA is specific and predictable.
+      Defining a precise UA list is challenging for SPAs used across various browsers.
+    - Alternative to listing UAs, consider specifying a minimum **allowed UA version** or specific key components,
+      as threat actors often use outdated or generic UAs.
+    - To determine a **baseline of normal behavior**, it is highly recommended to run the query (excluding the "where" clauses)
+      for a sufficient period and calculate thresholds based on the resulting data.
+tenant_logs: |
+    type: (seacft sertft)
+prevention:
+    - Deploy a post-login action that will compare UA of initial issuance of a refresh token (event.refresh_token.device.initial_user_agent)
+      against UA of a current refresh token (event.refresh_token.device.last_user_agent).
+      If they are different, terminate the session and revoke all refresh tokens.
+falsepositives:
+    - Software Updates - Legitimate automatic or manual updates to a user's browser or application that change the User Agent string.
+    - Advanced Architectures - Flows like App-to-Web SSO that inherently involve a change in the User Agent as the context switches.
+level: medium
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.t1550
+    - attack.t1550.004
+    - attack.t1078
+---
+title: Refresh Token Exchange from Multiple User Agents - Correlation
+correlation:
+    type: value_count
+    rules:
+        - selected_events # Referenced here
+    group-by:
+        - data.user_name
+        - data.user_id
+        - data.client_id
+        - data.details.familyId
+    timespan: 30d
+    condition:
+        gte: 1
+        field: data.user_agent
