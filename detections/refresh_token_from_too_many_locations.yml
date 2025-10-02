@@ -1,0 +1,85 @@
+title: Refresh Token Exchange from Excessive Locations
+id: a37fcabe-9ec1-4088-9157-b8121377cbca
+name: selected_events
+status: experimental
+description: |
+    Detects when a refresh token is exchanged for an access token from an unusual volume of distinct
+    locations (IP addresses, ASNs, or Geolocation).
+    An excessive number of locations suggests the refresh token may be hijacked and actively used by an attacker,
+    potentially indicating initial access and impersonation.
+author: Okta
+date: 2025-10-01
+modified: 2025-10-01
+logsource:
+    product: auth0
+detection:
+    selection:
+        data.type:
+            - seacft # Successful exchange of a code for access and refresh tokens
+            - sertft # Successful exchange of a refresh token for an access token
+    condition: selection
+explanation: >
+    The query collects the events where a refresh token has been issued by the /token endpoint.
+    This query analyzes events from the /token endpoint where a refresh token is exchanged and optionally rotated.
+    When refresh token rotation is enabled, a new refresh token is released upon every access token renewal.
+    The underlying assumption is that attackers tend to rapidly change their source IP to evade defenses like Suspicious IP Throttling.
+    This rule alerts when the number of source IPs used for refresh token exchanges exceeds a defined threshold.
+    The provided Splunk query offers two primary options:
+    **Option 1 (Volume Check):** Checks if the count of distinct source IPs exceeds a static threshold.
+    This is suitable for Single Page Applications (SPAs) or Native Apps where token exchange occurs client-side.
+    **Option 2 (Allowed IPs Check):** Identifies exchanges originating from IP addresses not present in a defined allow-list.
+    This is better suited for Regular Web Applications (RWAs) where the /token endpoint is called from a backend.
+    Both options can be combined for comprehensive monitoring.
+splunk: |
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type IN (seacft, sertft)
+    | fields data.ip data.user_id data.user_name data.client_id data.details.familyId
+    | stats dc(data.ip) as rt_ip_count values(data.ip) as observed_ips
+            by data.user_name data.user_id data.client_id data.details.familyId
+    ``` Option 1 - Check the volume of used IPs (Suits SPA and Native apps)```
+    | where rt_ip_count > {threshold_ips_count}
+    ``` Option 2 - Check for unapproved IPs (Suits RWA)```
+    ```| eval total_ip_count = mvcount(observed_ips)
+    | eval approved_ip = mvfilter(match(observed_ips, {list_of_allowed_ips}))
+    | eval approved_ip_count = mvcount(approved_ip)
+    | where approved_ip_count != total_ip_count```
+    ``` Print the suspicious records ```
+    | table data.user_name data.user_id data.client_id data.details.familyId rt_ip_count observed_ips
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - The following thresholds values should be set based on the customer's environment and expected behavior -
+      threshold_ips_count and list_of_allowed_ips (use the pipe "|" as a delimiter, e.g. "1.1.1.1|2.2.2.2|3.3.3.3")
+    - To determine a baseline of normal behavior, it is highly recommended to run the query (excluding the "where" clauses)
+      for a sufficient period and calculate thresholds based on the data.
+    - If IP enrichment data is available, consider using **ASN** or **Country/City** instead of raw IPs to significantly reduce noise.
+tenant_logs: |
+    type: (seacft sertft)
+prevention:
+    - Deploy a post-login action that will compare IP/ASN of initial issuance of a refresh token (event.refresh_token.device.initial_asn)
+      against IP/ASN of a current refresh token (event.refresh_token.device.last_asn).
+      If they are different, terminate the session and revoke all refresh tokens.
+falsepositives:
+    - Natural user movement, such as a mobile device transitioning from a Wi-Fi network to a mobile data network.
+    - IP addresses changes within the same Internet Service Provider (ISP).
+level: medium
+tags:
+    - attack.defense-evasion
+    - attack.persistence
+    - attack.t1550
+    - attack.t1550.004
+    - attack.t1078
+---
+title: Refresh Token Exchange from Excessive Locations - Correlation
+correlation:
+    type: value_count
+    rules:
+        - selected_events # Referenced here
+    group-by:
+        - data.user_name
+        - data.user_id
+        - data.client_id
+        - data.details.familyId
+    timespan: 30d
+    condition:
+        gte: 1
+        field: data.ip
