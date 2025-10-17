@@ -31,6 +31,7 @@ explanation: >
     performed by a backend service or a known application, making the expected UA highly predictable.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type IN (seacft, sertft)
     | fields data.user_agent data.user_id data.user_name data.client_id data.details.familyId
     | stats dc(data.user_agent) as ua_count values(data.user_agent) as observed_uas
             by data.user_name data.user_id data.client_id data.details.familyId

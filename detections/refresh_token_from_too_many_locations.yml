@@ -39,10 +39,12 @@ splunk: |
     ``` Option 1 - Check the volume of used IPs (Suits SPA and Native apps)```
     | where rt_ip_count > {threshold_ips_count}
     ``` Option 2 - Check for unapproved IPs (Suits RWA)```
-    ```| eval total_ip_count = mvcount(observed_ips)
+    ```
+    | eval total_ip_count = mvcount(observed_ips)
     | eval approved_ip = mvfilter(match(observed_ips, {list_of_allowed_ips}))
     | eval approved_ip_count = mvcount(approved_ip)
-    | where approved_ip_count != total_ip_count```
+    | where approved_ip_count != total_ip_count
+    ```
     ``` Print the suspicious records ```
     | table data.user_name data.user_id data.client_id data.details.familyId rt_ip_count observed_ips
 comments:
