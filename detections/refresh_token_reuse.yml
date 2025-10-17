@@ -44,7 +44,7 @@ prevention:
     - Terminate sessions and revoke tokens for affected users to pause the attack, however, it might come back when the user logs in again.
     - Deploy a post-login action that will compare IP/ASN of initial issuing of a refresh token and IP/ASN of the current refresh token.
       If they are different, terminate the session and revoke all refresh tokens.
-    - This measure can help to prevent sophisticated forms of refresh token hijacking attacks, when an advisory times when the application will
+    - This measure can help to prevent sophisticated forms of refresh token hijacking attacks, when an adversary times when the application will
       be shut down and thus avoiding a risk of rotation policy violation.
     - Consider to add additional layers to protect access tokens - sender-constrained flows (DPoP or mTLS) to address the possesion issue,
       back-channel logout to be able to revoke tokens, externalized authorization, e.g. with FGA, to avoid relying on permissions written in access tokens.

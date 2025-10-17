@@ -44,6 +44,8 @@ tenant_logs: |
 prevention:
     - Harden access to the dynamic client registration (DCR) endpoint with Auth0 Tenant ACL or by placing a specialised WAF in front of your tenant.
     - Disable temporary the DCR end point
+    - Consider adopting OAuth Client ID Metadata Document standard (adopted by IETF Oct 2025)
+      https://datatracker.ietf.org/doc/draft-parecki-oauth-client-id-metadata-document/
 falsepositives:
     - None
 level: medium
