@@ -32,7 +32,7 @@ splunk: >
     | table count_pushes_per_user, window_duration_mins, data.user_id, data.ip
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name, how quick were seen push notifications were sent,
-      i.e {time_window_threshold}, and  how many push notifications have been sent per user ({count_pushes_per_user_threshold}).
+      i.e {time_window_threshold}, and how many push notifications have been sent per user ({count_pushes_per_user_threshold}).
     - A similar detection (with less details) can be implemented through Security Center and its alerts.
 tenant_logs: |
     type:"gd_send_pn" AND description: "Guardian - Second factor notification sent"

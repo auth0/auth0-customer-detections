@@ -32,7 +32,7 @@ explanation: >
   The Splunk query below displays clints/applications and log references.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
-    data.type IN ("s", "f", "fs", "ss", "w", "fp", "scoa", "fcoa", "sepft", "fepft")
+    data.type IN (s, f, fs, ss, w, fp, scoa, fcoa, sepft, fepft)
     data.hostname="{your-tenant-url}"
     | fields data.client_id, data.client_name, data.log_id
     | table _time, data.client_id, data.client_name, data.log_id

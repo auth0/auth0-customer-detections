@@ -26,7 +26,7 @@ splunk: |
     | stats dc(data.user_id) as users_count values(data.ip) by data.details.authenticator.phone_number
     | where users_count > 1
 comments:
-    - The Splunk query above shall be tuned to reflect a valid tenant_name.
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
 tenant_logs: |
     type: "gd_enrollment_complete" AND description: "Guardian - Enrollment complete (sms)"
 prevention:
