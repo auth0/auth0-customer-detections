@@ -1,0 +1,63 @@
+title: Unauthorized or Unexpected Enabling of Cross-Origin Authentication (CORS)
+id: cd0b61a4-6917-4a9e-a86c-9b10d7792e24
+status: experimental
+description: |
+    Detects when cross-origin authentication (CORS) has been enabled for an application.
+    Cross-origin authentication feature often targeted by threat actors to conduct credential stuffing attacks.
+    Monitoring this change helps preemptively reduce the risk of this attack vector.
+author: Okta
+date: 2025-11-03
+modified: 2025-11-03
+references:
+    - https://sec.okta.com/articles/2024/05/detecting-cross-origin-authentication-credential-stuffing-attacks/
+logsource:
+    product: auth0
+detection:
+    selection:
+        data.type:
+            - sapi # Failed login
+    filter_cors_attribute:
+        data.details.response.body.cross_origin_authentication:
+            - true
+    condition: selection and filter_cors_attribute
+explanation: >
+    This rule monitors Management API (sapi) calls that successfully modify client configurations (sapi).
+    The detection focuses specifically on events where the cross_origin_authentication parameter is set to true.
+    The most effective detection is to alert on every instance where this setting is newly enabled
+    as the event itself represents a security posture change.
+    The accompanying Splunk query includes an option to monitor only the latest configuration for each application, which is useful for audit purposes.
+    Optionally, this query can be adjusted to exclude exempted applications, but it is not recommended.
+splunk: |
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type = sapi data.description="Update a client" data.details.response.statusCode=200
+    | spath data.details.response.body.client_id output=affected_client_id
+    ``` Allow list of exempted applications ```
+    ```| where client_id IN ({exempted_applications_client_id})```
+    ``` Return current/latest configurations for each application/client_id ```
+    | sort -_time, affected_client_id
+    | dedup affected_client_id
+    ``` Alert when CORS is enabled for any of the monitored applications ```
+    | search data.details.response.body.cross_origin_authentication=true
+    ``` Preparing output```
+    | rename data.details.response.body.cross_origin_authentication as is_cors_eanbled
+    | rename data.details.response.body.allowed_origins{} as cors_allowed_origins
+    | table _time, data.ip data.user_id affected_client_id is_cors_eanbled cors_allowed_origins
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name,
+     and optionally a list of exempted applications, i.e. {exempted_applications_client_id}
+tenant_logs: |
+    type: (sapi)
+prevention:
+    - Do not allow cross-origin authentication for your applications.
+      When it is absolutely unavoidable, restrict the permitted origins, i.e. see cors_allowed_origins
+    - If a user password was compromised in a credential stuffing attack (scoa event), rotate immediately credentials for these users for precaution.
+    - Enforce your password policies (e.g., minimum 12 characters)
+    - Turn on respective attack protection features
+    - Long term solution is to avoid password-based authentication and favour stronger factors like passkeys
+falsepositives:
+    - An exempted application has been configured to allow cross-origin authentication.
+level: medium
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007

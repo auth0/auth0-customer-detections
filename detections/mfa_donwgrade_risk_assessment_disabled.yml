@@ -1,0 +1,52 @@
+title: MFA downgrade - adaptive MFA risk assessment disabled
+id: 3600d0d2-41af-4958-8896-e0ffe8723f26
+status: experimental
+description: |
+    Detects modifications to the Multi-Factor Authentication (MFA) risk assessment configuration that disables the collection of risk signals after authentication.
+    These signals are often leveraged to calculate customized session risk within post-login Actions, for example, to trigger MFA challenge or deny access.
+    When recording of these risk signals has been disabled, it reduces efficiency of corresponding security controls.
+    This activity is a major security downgrade that can be performed by an attacker to evade detection.
+author: Okta
+date: 2025-10-29
+modified: 2025-10-29
+logsource:
+    product: auth0
+detection:
+    selection:
+        data.type: sapi
+        data.description: "Updates risk assessment configs"
+        data.details.response.statusCode: 200
+        data.details.response.body.AfterAuthentication: false
+    condition: selection
+explanation: >
+    This rule monitors Management API (sapi) calls that update MFA risk assessment configurations.
+    The detection criteria focus on successful updates where the Adaptive risk assessment has been disabled, i.e. the AfterAuthentication parameter is set to **false**.
+splunk: |
+    index=auth0 data.tenant_name="{your-tenant-name}"
+    data.type = sapi data.description = "Updates risk assessment configs"
+    data.details.response.statusCode = 200
+    | fields data.details.request.ip data.user_id data.details.response.body.AfterAuthentication
+    ``` Take only the last change of configurations that reflects the current settings ```
+    | sort - _time
+    | head 1
+     ``` Filter for the security downgrade: AfterAuthentication is set to false ```
+    | search data.details.response.body.AfterAuthentication=false
+    ``` Print output ```
+    | table _time data.details.request.ip data.user_id data.details.response.body.AfterAuthentication
+comments:
+    - The Splunk query above shall be tuned to reflect a valid tenant name.
+    - Limit the detection to actions conducted from untrusted IPs and/or particular users.
+tenant_logs: |
+    type: "sapi" AND description: "Updates risk assessment configs"
+prevention:
+    - Strictly control and review tenant admin roles, e.g. "Admin", as they have permissions to modify MFA settings.
+    - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
+    - Control Management API scopes that allow modification of MFA settings - update:mfa_policies.
+    - Use Auth0 Network ACL feature to limit calls to the Management API, i.e. scope "management", to only trusted, static IP ranges.
+falsepositives:
+    - Intentional legitimate disabling by administrators.
+level: medium
+tags:
+    - attack.defense-evasion
+    - attack.t1562
+    - attack.t1562.007
