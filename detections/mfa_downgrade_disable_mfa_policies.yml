@@ -43,6 +43,7 @@ splunk: |
        mfa_mode ="confidence-score", "Adaptive MFA",
        true(), "Never"
       )
+    ``` Print output ```
     | table _time, data.details.request.ip, data.user_id, mfa_policy
 comments:
     - The Splunk query above shall be tuned to reflect a valid tenant name.
@@ -53,10 +54,11 @@ tenant_logs: |
 prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
-    - Control Management API scopes that allow modification of attack protection features - update:attack_protection.
+    - Control Management API scopes that allow modification of MFA settings - update:mfa_policies.
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
 falsepositives:
     - MFA can be disabled in favour of the custom MFA setup via Actions.
+    - Intentional legitimate disabling by administrators.
 tags:
     - attack.defense-evasion
     - attack.t1562

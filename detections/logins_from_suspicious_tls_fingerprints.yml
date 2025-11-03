@@ -58,6 +58,8 @@ comments:
     - Other patterns indicating credential stuffing attack can be plugged in in this query.
       See three signals from the detection credential_stuffing_signals.yml.
     - As an alternative to JA4, a JA3 fingerprint can be used for correlation.
+     Note, that JA4 are more stable and less sensitive to small changes to violitily of TLS handshake details.
+    - Filter out JA4 fingerprints from known browsers/applications/tools https://ja4db.com/
 tenant_logs: |
     type: (s scoa)
 prevention:
