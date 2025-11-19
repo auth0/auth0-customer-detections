@@ -1,13 +1,6 @@
 # https://yamllint.readthedocs.io/en/latest/configuration.html
 extends: default
 
-ignore:
-    - .github/
-    - deprecated/
-    - other/godmode_sigma_rule.yml
-    - tests/
-    - unsupported/
-
 rules:
     comments:
         require-starting-space: true
