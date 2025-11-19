@@ -57,10 +57,7 @@ class TestYamlValidation:
         for yaml_file in yaml_files:
             try:
                 with open(yaml_file, "r", encoding="utf-8") as f:
-                    # Use yaml.safe_load(f) to allow only single YAML documents (no ---)
-                    # yaml.safe_load(f)
-                    # Use safe_load_all to allow for multiple YAML documents (---)
-                    list(yaml.safe_load_all(f))
+                    yaml.safe_load(f)
             except yaml.YAMLError as e:
                 pytest.fail(f"YAML syntax error in {yaml_file}: {e}")
             except Exception as e:
