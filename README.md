@@ -20,11 +20,11 @@ Each log entry is attributed with an [event type](https://auth0.com/docs/customi
 
 Okta Security recommends the use of [Log Streaming](https://auth0.com/docs/customize/log-streams) to capture events in third-party security tools in close to real-time and/or the use of [Auth0 Actions](https://auth0.com/docs/customize/actions) for security orchestration opportunities. Besides extended retention ([your Auth0 log data retention period depends on your subscription level](https://auth0.com/docs/deploy-monitor/logs/log-data-retention)), this will allow security teams to conduct a more sophisticated search and analysis of logs.
 
-Most of the detections provided in this catalogue require logs to be streamed to the third-party tools, e.g. Splunk. However, each detection is also attributed with a query in the Lucene syntax that can be used directly in the Auth0 Dashboard. This will help to locate log entries of interest, while further analysis should be conducted with the third-party tool.
+Most of the detections provided in this catalog require logs to be streamed to the third-party tools, e.g. Splunk. However, each detection is also attributed with a query in the Lucene syntax that can be used directly in the Auth0 Dashboard. This will help to locate log entries of interest, while further analysis should be conducted with the third-party tool.
 
 ## Schema and compatibility {schema}
 
-The detection rules in the `detections/` directory are compatible with the [Sigma](https://sigmahq.io/) rule specification [v2.0.0](https://github.com/SigmaHQ/sigma-specification/blob/3e27a92ca649c2798e65b4300bf58deee1149118/json-schema/sigma-detection-rule-schema.json). As a convenience for users, we have included arbirary custom fields that provide more detailed examples as an aid for users.
+The detection rules in the `detections/` directory are compatible with the [Sigma](https://sigmahq.io/) rule specification [v2.1.0](https://github.com/SigmaHQ/sigma-specification/blob/0c857d07da0e71eaaab2d667b3cce6f2c8469578/json-schema/sigma-detection-rule-schema.json). As a convenience for users, we have included arbirary custom fields that provide more detailed examples.
 
 ### Custom Fields
 
