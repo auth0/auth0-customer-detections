@@ -15,7 +15,7 @@ logsource:
 detection:
     selection:
         data.type:
-            - sapi # Failed login
+            - sapi
     filter_cors_attribute:
         data.details.response.body.cross_origin_authentication:
             - true
