@@ -19,6 +19,7 @@ explanation: The query simply collects entries issued when such a token is acces
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=seccft data.client_id="{api_explorer_client_id}"
+    OR data.client_name = "API Explorer Application"
     | fields data.user_id, data.user_name, data.ip
     ```Display the information in a table: user checking the secret and IP of this user```
     | table _time, data.user_id, data.user_name, data.ip
@@ -30,6 +31,9 @@ prevention:
     - Control tenant admins, i.e. "Admin", as this role has permissions to modify any application.
     - Enforce MFA for tenant admins to reduce the risk of an adversary gaining access.
     - Control usage of Management API from only trusted IPs by applying Network ACL scoped to "management".
+    - Apply the least-privilige principle even for this client called "API Explorer Application" and reduce authorized scopes.
+    - Reduce the token expiration time for this token that is 24 hours by default.
+    - Delete this applcation known by default as "API Explorer Application" all together.
 falsepositives:
     - Legitimate access by an administrator to read the API Explorer token.
 level: medium
