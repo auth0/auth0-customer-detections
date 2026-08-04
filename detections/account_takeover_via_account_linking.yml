@@ -8,8 +8,9 @@ description: |
     POST /api/v2/users/{id}/identities ("Link a User Account"). Once linked, authenticating with the
     attacker-controlled identity resolves to the victim's primary account, i.e. full account takeover.
     Benign self-service linking uses the exact same API call, so this rule keys on the delegated-token shape of the
-    event combined with anomalies in the resulting identities array (identity fan-in, multiple identities sharing a
-    single connection, and unverified linked identities) to separate the attack from legitimate linking.
+    event and then on the tell-tale result of the attack: an account that holds more identities than distinct
+    connections, i.e. at least two identities merged into one account that share a single connection, which normal
+    cross-connection linking does not produce.
 author: Okta
 date: 2026-08-04
 modified: 2026-08-04
@@ -27,25 +28,21 @@ detection:
         data.details.request.channel: api
         data.details.request.auth.credentials.scopes{}:
             - 'update:current_user_identities'
-    unverified_identity_present:
-        # At least one identity in the resulting set is unverified. Legitimate linking normally merges an identity
-        # whose control was proven (verified). This is the tightest response-body anomaly expressible in Sigma;
-        # the identity fan-in and duplicate-connection checks require counting and live in the Splunk query below.
-        data.details.response.body{}.profileData.email_verified: false
-    condition: selection and delegated_token and unverified_identity_present
+    # NOTE: the same-connection check (more identities than distinct connections) cannot be expressed in Sigma
+    # field matching because it requires counting array elements and detecting duplicate values. It lives in the
+    # Splunk query below. This Sigma condition is therefore the coarse delegated-token gate only, and a converted
+    # rule will match more broadly than the Splunk detection.
+    condition: selection and delegated_token
 explanation: >
     The query collects successful "Link a User Account" Management API events (sapi, statusCode 201).
     It first isolates the attack backbone: a user-delegated token (request channel "api" and the
     update:current_user_identities scope present in the request credentials), which removes the bulk of benign
     linking performed by administrators via the dashboard or by M2M integrations.
-    It then inspects the identities array returned in the response body and scores three independent anomalies:
-    (1) identity fan-in - the number of identities now merged into a single account exceeds a threshold;
-    (2) duplicate connection - more than one identity shares a single connection, which has no legitimate
-    account-linking use case; and (3) unverified identities - at least one linked identity has email_verified=false.
-    The tight default gate alerts only when at least two of these anomalies coincide, which strongly separates the
-    attacker account-farming pattern from ordinary self-service linking. Two optional enrichment blocks correlate
-    the newly linked identity with a recent signup (throwaway attacker accounts) and flag an originating IP/geo shift
-    away from the victim's normal login infrastructure.
+    It then inspects the identities array returned in the response body and alerts when the account holds more
+    identities than distinct connections, i.e. at least two identities share a single connection. Legitimate
+    linking is cross-connection (unifying a user's different login methods), so a same-connection merge within the
+    delegated population is the signature of attacker account farming and is the sole trigger used here; the
+    identity count is reported alongside for triage.
 splunk: |
     index=auth0 data.tenant_name="{your-tenant-name}"
     data.type=sapi data.description="Link a User Account"
@@ -54,70 +51,35 @@ splunk: |
         channel=api together with a current_user write scope in the presented credentials. ```
     data.details.request.channel="api"
     data.details.request.auth.credentials.scopes{}="update:current_user_identities"
-    ``` Optional - also require the empty admin subject that accompanies a delegated token ```
-    ``` | where isnull('data.details.request.auth.user.email') ```
     | fields _time, data.ip, data.user_agent, data.details.request.path,
         data.details.response.body{}.user_id,
         data.details.response.body{}.connection,
-        data.details.response.body{}.profileData.email,
-        data.details.response.body{}.profileData.email_verified
+        data.details.response.body{}.profileData.email
     | rename data.details.response.body{}.user_id as linked_user_ids
     | rename data.details.response.body{}.connection as linked_connections
     | rename data.details.response.body{}.profileData.email as linked_emails
-    | rename data.details.response.body{}.profileData.email_verified as linked_email_verified
-    ``` Signal 1 - identity fan-in: how many identities are now merged into one account ```
+    ``` Detection: the account now holds more identities than distinct connections, i.e. at least two identities
+        share one connection. Normal linking is cross-connection (unifying a user's different login methods), so a
+        same-connection merge within the delegated population isolated above is the account-farming signature seen
+        in the attack PoC. identity_count is reported for triage (fan-in); it is not part of the trigger. ```
     | eval identity_count = mvcount(linked_user_ids)
-    | eval fan_in = if(identity_count >= {fan_in_threshold}, 1, 0) ``` e.g. 3 ```
-    ``` Signal 2 - same-connection merge: more identities than distinct connections means at least two
-        identities share one connection (no legitimate reason to merge multiple accounts of one connection) ```
     | eval distinct_connections = mvcount(mvdedup(linked_connections))
-    | eval dup_connection = if(identity_count > distinct_connections, 1, 0)
-    ``` Signal 3 - unverified merges: at least one linked identity has email_verified=false ```
-    | eval unverified = if(match(mvjoin(linked_email_verified, ","), "(?i)false"), 1, 0)
-    ``` Tight default gate: require at least two independent anomalies to fire ```
-    | eval anomaly_score = fan_in + dup_connection + unverified
-    | where anomaly_score >= 2
+    | where identity_count > distinct_connections
     | table _time, data.ip, data.user_agent, data.details.request.path,
-        identity_count, distinct_connections, anomaly_score,
-        linked_emails, linked_connections, linked_email_verified
-    ``` ----------------------------------------------------------------------------------------------------
-        Option E1 (enrichment) - correlate a linked identity with a recent signup ("ss"), i.e. throwaway
-        attacker accounts created minutes before the link. Join each linked user_id to ss events in the last
-        {N} minutes and keep only links that merged a freshly created account. ```
-    ``` | mvexpand linked_user_ids
-        | join type=left linked_user_ids
-            [ search index=auth0 data.tenant_name="{your-tenant-name}" data.type=ss earliest=-{N}m
-              | rename data.user_id as linked_user_ids
-              | eval recently_created=1
-              | fields linked_user_ids recently_created ]
-        | where recently_created=1 ```
-    ``` ----------------------------------------------------------------------------------------------------
-        Option E2 (enrichment) - IP/geo shift: the link call originates from infrastructure not seen in the
-        primary (path) user's recent interactive logins ("s"). Extract the primary user_id from the request
-        path, compare data.ip / data.location_info.country_code against that user's baseline, and keep shifts. ```
-    ``` | rex field=data.details.request.path "users/(?<primary_user_id>[^/]+)/identities"
-        | join type=left primary_user_id
-            [ search index=auth0 data.tenant_name="{your-tenant-name}" data.type=s earliest=-30d
-              | rename data.user_id as primary_user_id
-              | stats values(data.ip) as known_ips values(data.location_info.country_code) as known_countries
-                by primary_user_id ]
-        | eval ip_known = if(isnull(mvfind(known_ips, "^" . 'data.ip' . "$")), 0, 1)
-        | where ip_known = 0 ```
+        identity_count, distinct_connections,
+        linked_emails, linked_connections
 comments:
-    - The Splunk query must be tuned to reflect a valid tenant name, the {fan_in_threshold} (e.g. 3), and the {N}
-      minute window used by Option E1.
+    - The Splunk query must be tuned to reflect a valid tenant name.
     - The discriminating fields (data.details.request.channel, data.details.request.auth.*,
       data.details.response.body{}.*) are not exposed to Auth0 Dashboard log search (q=). Use the tenant_logs query
       only to locate candidate events, then analyse them in your SIEM.
     - The backbone (channel=api together with update:current_user_identities in the request credentials) removes
       admin/dashboard and M2M linking, which are the bulk of benign "Link a User Account" events. It does not by
-      itself separate the attack from legitimate user self-service linking - that is the job of the response-body
-      anomaly gate and the optional enrichment clauses.
-    - Optionally require an empty admin subject (isnull(data.details.request.auth.user.email)) to further constrain
-      the match to delegated tokens; see the commented clause in the Splunk query.
+      itself separate the attack from legitimate user self-service linking - that is the job of the same-connection
+      check.
     - The link_with value in the request body is a signed JWT (id_token) whose claims are not directly queryable, so
       this rule uses the queryable response identities array instead. That array is the full resulting set of linked
-      identities, which is exactly what the fan-in, duplicate-connection, and unverified checks operate on.
+      identities, which is exactly what the same-connection check operates on.
 tenant_logs: |
     type:"sapi" AND description:"Link a User Account"
 prevention:
@@ -133,11 +95,12 @@ prevention:
 falsepositives:
     - Legitimate self-service account linking, especially bulk or migration flows executed through a delegated
       token. This rule is designed for threat hunting and to be a starting point for further investigation.
-    - Applications that intentionally merge multiple accounts for a single user. Tune {fan_in_threshold} and the
-      anomaly gate to your environment.
-    - Sigma-only conversions apply only the coarse gate (delegated token plus an unverified linked identity) because
-      Sigma field matching cannot count identities or detect duplicate connections. Expect more matches from a
-      converted rule than from the Splunk query, which enforces the two-anomaly gate.
+    - A user legitimately merging two of their own accounts on the same connection (self-service de-duplication)
+      produces the same event shape and will trigger this rule.
+    - Sigma-only conversions apply only the coarse gate (the delegated-token shape) because Sigma field matching
+      cannot count identities or detect duplicate connections. Expect substantially more matches from a converted
+      rule than from the Splunk query, which enforces the same-connection check. Deploy the Splunk logic for
+      production.
 level: high
 tags:
     - attack.persistence
