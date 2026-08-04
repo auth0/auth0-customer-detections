@@ -72,10 +72,11 @@ falsepositives:
     - The hunting window is too wide and an adversary has already moved on to other IPs and the indicated IPs belong to a legit user since then.
 level: medium
 tags:
-    - attack.credential_access
-    - attack.initial_access
+    - attack.credential-access
+    - attack.initial-access
 ---
 title: Successful logins from suspicious IPs
+id: f7694180-df6d-4d65-b733-4b9c13785f43
 correlation:
     type: value_count
     rules:

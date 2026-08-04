@@ -72,6 +72,7 @@ tags:
     - attack.t1078
 ---
 title: Refresh Token Exchange from Multiple User Agents - Correlation
+id: aeeaed8f-836a-4ec5-bc02-b148e7f18e20
 correlation:
     type: value_count
     rules:

@@ -66,10 +66,11 @@ falsepositives:
     - Legitimate users may not verify their email immediately after signup, leading to false positives.
 level: medium
 tags:
-    - attack.credential_access
+    - attack.credential-access
     - attack.reconnaissance
 ---
 title: Creation of many unverified accounts
+id: b15b7fbe-a53a-4675-b51b-84f604803001
 correlation:
     type: value_count
     rules:

@@ -59,6 +59,7 @@ tags:
     - attack.t1078
 ---
 title: Refresh Token Reuse Detection - Correlation
+id: a76f1e80-7208-4fe7-8aea-46cee74d1292
 correlation:
     type: event_count
     rules:
