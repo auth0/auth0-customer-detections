@@ -1,7 +1,7 @@
 ---
 name: Test
 
-on:
+on:  # yamllint disable-line rule:truthy
     push:
         branches:
             - '*'
@@ -58,4 +58,4 @@ jobs:
           run: pytest
 
         - name: Validate Sigma rules
-          run: sigma check detections/
+          run: sigma check --fail-on-issues detections/

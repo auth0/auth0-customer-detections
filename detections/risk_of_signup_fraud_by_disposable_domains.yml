@@ -66,7 +66,8 @@ tags:
     - attack.resource-development
     - attack.t1136
 ---
-title: Surge in signup events
+title: Surge in signup events from disposable domains
+id: 7b4433e7-2857-4cfc-bfe0-29dc74feb63f
 correlation:
     type: value_count
     rules:

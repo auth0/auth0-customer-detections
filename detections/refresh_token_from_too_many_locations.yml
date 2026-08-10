@@ -72,6 +72,7 @@ tags:
     - attack.t1078
 ---
 title: Refresh Token Exchange from Excessive Locations - Correlation
+id: 941ab90f-c4da-4449-8cf4-82b8a4df25b5
 correlation:
     type: value_count
     rules:

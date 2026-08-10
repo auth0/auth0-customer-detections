@@ -80,7 +80,8 @@ tags:
     - attack.resource-development
     - attack.t1136
 ---
-title: Surge in signup events
+title: Surge in signup events by volume
+id: 99d03061-b59a-44e5-9924-c8d5afee501c
 correlation:
     type: event_count
     rules:
